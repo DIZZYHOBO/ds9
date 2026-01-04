@@ -7,7 +7,7 @@ import {
   chatbubbleOutline,
   eyeOffOutline,
 } from "ionicons/icons";
-import { ComponentProps } from "react";
+import { ComponentProps, useState } from "react";
 import { CommentView, PersonView } from "threadiverse";
 
 import { userHandleSelector } from "#/features/auth/authSelectors";
@@ -30,12 +30,13 @@ import useClient from "#/helpers/useClient";
 import { LIMIT } from "#/services/lemmy";
 import { useAppDispatch, useAppSelector } from "#/store";
 
-import Scores from "./Scores";
+import ProfileHeader from "./ProfileHeader";
+import ProfileTabs, { ProfileTabType } from "./ProfileTabs";
 
-interface ProfileProps extends Pick<
-  ComponentProps<typeof PostCommentFeed>,
-  "onPull"
-> {
+import styles from "./Profile.module.css";
+
+interface ProfileProps
+  extends Pick<ComponentProps<typeof PostCommentFeed>, "onPull"> {
   person: Pick<PersonView, "person" | "counts">;
 }
 
@@ -48,6 +49,7 @@ export default function Profile({ person, onPull }: ProfileProps) {
     type: "ModeratorView",
   });
   const dispatch = useAppDispatch();
+  const [activeTab, setActiveTab] = useState<ProfileTabType>("overview");
 
   const isSelf = getRemoteHandle(person.person) === myHandle;
 
@@ -70,78 +72,43 @@ export default function Profile({ person, onPull }: ProfileProps) {
     return response;
   };
 
+  const handleTabChange = (tab: ProfileTabType) => {
+    if (tab === "overview") {
+      setActiveTab("overview");
+      return;
+    }
+
+    // For other tabs, navigate to dedicated pages
+    const handle = getHandle(person.person);
+    const routes: Record<ProfileTabType, string> = {
+      overview: `/u/${handle}`,
+      posts: `/u/${handle}/posts`,
+      comments: `/u/${handle}/comments`,
+      saved: `/u/${handle}/saved`,
+      upvoted: `/u/${handle}/upvoted`,
+      downvoted: `/u/${handle}/downvoted`,
+      hidden: `/u/${handle}/hidden`,
+    };
+
+    // Use window.location for navigation since we're inside the feed
+    window.location.href = buildGeneralBrowseLink(routes[tab]);
+  };
+
   const header = (
     <MaxWidthContainer>
-      <Scores
-        aggregates={person.counts}
-        accountCreated={person.person.published}
+      {/* New Profile Header with Banner, Avatar, Bio */}
+      <ProfileHeader person={person} />
+
+      {/* Horizontal Tabs */}
+      <ProfileTabs
+        person={person}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
-      <IonList inset>
-        <IonItem
-          routerLink={buildGeneralBrowseLink(
-            `/u/${getHandle(person.person)}/posts`,
-          )}
-          detail
-        >
-          <IonIcon icon={albumsOutline} color="primary" slot="start" />{" "}
-          <IonLabel className="ion-text-nowrap">Posts</IonLabel>
-        </IonItem>
-        <IonItem
-          routerLink={buildGeneralBrowseLink(
-            `/u/${getHandle(person.person)}/comments`,
-          )}
-          detail
-        >
-          <IonIcon icon={chatbubbleOutline} color="primary" slot="start" />{" "}
-          <IonLabel className="ion-text-nowrap">Comments</IonLabel>
-        </IonItem>
-        {isSelf && (
-          <>
-            <IonItem
-              routerLink={buildGeneralBrowseLink(
-                `/u/${getHandle(person.person)}/saved`,
-              )}
-              detail
-            >
-              <IonIcon icon={bookmarkOutline} color="primary" slot="start" />{" "}
-              <IonLabel className="ion-text-nowrap">Saved</IonLabel>
-            </IonItem>
-            {mode !== "piefed" && (
-              <>
-                <IonItem
-                  routerLink={buildGeneralBrowseLink(
-                    `/u/${getHandle(person.person)}/upvoted`,
-                  )}
-                  detail
-                >
-                  <IonIcon icon={arrowUp} color="primary" slot="start" />{" "}
-                  <IonLabel className="ion-text-nowrap">Upvoted</IonLabel>
-                </IonItem>
-                <IonItem
-                  routerLink={buildGeneralBrowseLink(
-                    `/u/${getHandle(person.person)}/downvoted`,
-                  )}
-                  detail
-                >
-                  <IonIcon icon={arrowDown} color="primary" slot="start" />{" "}
-                  <IonLabel className="ion-text-nowrap">Downvoted</IonLabel>
-                </IonItem>
-              </>
-            )}
-            <IonItem
-              routerLink={buildGeneralBrowseLink(
-                `/u/${getHandle(person.person)}/hidden`,
-              )}
-              detail
-            >
-              <IonIcon icon={eyeOffOutline} color="primary" slot="start" />{" "}
-              <IonLabel className="ion-text-nowrap">Hidden</IonLabel>
-            </IonItem>
-          </>
-        )}
-      </IonList>
+
+      {/* Mod Zone (only for self and if mod) */}
       {isSelf && role && (
-        <IonList inset>
+        <IonList inset className={styles.modZone}>
           <IonItem detail button onClick={presentModZoneActions}>
             <IonIcon
               icon={getModIcon(role)}

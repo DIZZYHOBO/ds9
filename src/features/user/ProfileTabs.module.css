@@ -1,0 +1,48 @@
+.tabsContainer {
+  background: var(--ion-background-color);
+  border-bottom: 1px solid var(--ion-color-step-100);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.tabsScroll {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 8px;
+  gap: 4px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tab {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ion-color-medium);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--ion-text-color);
+  }
+
+  &:active {
+    background: var(--ion-color-step-50);
+  }
+}
+
+.tabActive {
+  color: var(--ion-color-primary);
+  border-bottom-color: var(--ion-color-primary);
+  font-weight: 600;
+}

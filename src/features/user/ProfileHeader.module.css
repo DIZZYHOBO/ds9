@@ -1,0 +1,132 @@
+.profileHeader {
+  display: flex;
+  flex-direction: column;
+  background: var(--ion-background-color);
+}
+
+/* Banner Section */
+.bannerContainer {
+  position: relative;
+  width: 100%;
+  height: 120px;
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.bannerPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--ion-color-primary) 0%,
+    var(--ion-color-primary-shade) 100%
+  );
+}
+
+/* Avatar */
+.avatarContainer {
+  position: absolute;
+  bottom: -40px;
+  left: 16px;
+  z-index: 10;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--ion-background-color);
+  object-fit: cover;
+  background: var(--ion-background-color);
+}
+
+.avatarPlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid var(--ion-background-color);
+  background: var(--ion-color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* User Info Section */
+.userInfo {
+  padding: 48px 16px 16px;
+}
+
+.displayName {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ion-text-color);
+  line-height: 1.2;
+}
+
+.username {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+  word-break: break-all;
+}
+
+/* Stats Row */
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 0;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statValue {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ion-text-color);
+}
+
+.statLabel {
+  font-size: 0.85rem;
+  color: var(--ion-color-medium);
+}
+
+.statIcon {
+  font-size: 1rem;
+  color: var(--ion-color-medium);
+}
+
+.statDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--ion-color-step-200);
+}
+
+/* Bio Section */
+.bioContainer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ion-color-step-100);
+}
+
+.bio {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ion-text-color);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
