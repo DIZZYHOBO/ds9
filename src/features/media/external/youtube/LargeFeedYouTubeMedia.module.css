@@ -1,0 +1,4 @@
+.container {
+  background: var(--lightroom-bg);
+  border-radius: 0;
+}

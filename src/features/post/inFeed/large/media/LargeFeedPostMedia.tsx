@@ -3,6 +3,8 @@ import { PostView } from "threadiverse";
 
 import { isRedgif } from "#/features/media/external/redgifs/helpers";
 import LargeFeedRedgifMedia from "#/features/media/external/redgifs/LargeFeedRedgifMedia";
+import { isYouTubeUrl } from "#/features/media/external/youtube/helpers";
+import LargeFeedYouTubeMedia from "#/features/media/external/youtube/LargeFeedYouTubeMedia";
 import { buildMediaId } from "#/features/media/video/VideoPortalProvider";
 import { cx } from "#/helpers/css";
 
@@ -20,6 +22,17 @@ export default function LargeFeedPostMedia(
 
   if (props.post.post.url) {
     switch (true) {
+      // YouTube embed support
+      case isYouTubeUrl(props.post.post.url):
+        return (
+          <LargeFeedYouTubeMedia
+            {...props}
+            url={props.post.post.url}
+            className={cx(styles.lightbox, props.className)}
+          />
+        );
+
+      // Redgif embed support
       case isRedgif(props.post.post.url):
         return (
           <LargeFeedRedgifMedia

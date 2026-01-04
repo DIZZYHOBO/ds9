@@ -1,6 +1,7 @@
 import { PostView } from "threadiverse";
 
 import { isRedgif } from "#/features/media/external/redgifs/helpers";
+import { isYouTubeUrl } from "#/features/media/external/youtube/helpers";
 import { findLoneImage } from "#/helpers/markdown";
 import { findUrlMediaType } from "#/helpers/url";
 import { useAppSelector } from "#/store";
@@ -22,6 +23,10 @@ export default function useIsPostUrlMedia() {
     }
 
     if (embedExternalMedia) {
+      // YouTube videos
+      if (isYouTubeUrl(url)) return "from-url";
+
+      // Redgifs
       if (isRedgif(url)) return "from-url";
     }
 

@@ -1,11 +1,12 @@
 import { IonIcon } from "@ionic/react";
-import { link, linkOutline } from "ionicons/icons";
+import { link, linkOutline, playCircle } from "ionicons/icons";
 import { MouseEvent, useMemo } from "react";
 import { PostView } from "threadiverse";
 
 import { useAutohidePostIfNeeded } from "#/features/feed/PageTypeContext";
 import { isNsfwBlurred } from "#/features/labels/Nsfw";
 import CachedImg from "#/features/media/CachedImg";
+import { isYouTubeUrl, getYouTubeVideoId, getYouTubeThumbnailUrl } from "#/features/media/external/youtube/helpers";
 import InAppExternalLink from "#/features/shared/InAppExternalLink";
 import { cx } from "#/helpers/css";
 import { forceSecureUrl } from "#/helpers/url";
@@ -58,10 +59,17 @@ export default function Thumbnail({ post }: ImgProps) {
   const showSelfPostThumbnails = useAppSelector(
     (state) => state.settings.appearance.compact.showSelfPostThumbnails,
   );
+  const embedExternalMedia = useAppSelector(
+    (state) => state.settings.appearance.posts.embedExternalMedia,
+  );
 
   const nsfw = isNsfwBlurred(post, blurNsfw);
 
-  const isLink = !urlIsMedia && post.post.url;
+  // Check if this is a YouTube URL
+  const isYouTube = post.post.url && embedExternalMedia && isYouTubeUrl(post.post.url);
+  const youtubeVideoId = isYouTube ? getYouTubeVideoId(post.post.url!) : undefined;
+
+  const isLink = !urlIsMedia && post.post.url && !isYouTube;
 
   const handleLinkClick = (e: MouseEvent) => {
     e.stopPropagation();
@@ -71,6 +79,22 @@ export default function Thumbnail({ post }: ImgProps) {
   };
 
   function renderContents() {
+    // YouTube thumbnail with play icon
+    if (isYouTube && youtubeVideoId) {
+      const thumbnailUrl = getYouTubeThumbnailUrl(youtubeVideoId, "mq");
+      return (
+        <>
+          <CachedImg
+            src={thumbnailUrl}
+            className={cx(styles.img, nsfw && styles.blurImg)}
+          />
+          {!nsfw && (
+            <IonIcon className={styles.playIcon} icon={playCircle} />
+          )}
+        </>
+      );
+    }
+
     if (isLink) {
       if (post.post.thumbnail_url)
         return (
@@ -108,6 +132,16 @@ export default function Thumbnail({ post }: ImgProps) {
   if (!showSelfPostThumbnails && contents.type === SelfSvg) return;
 
   const style = { width: getWidthForSize(thumbnailSize) };
+
+  // YouTube thumbnails are clickable but don't open external link
+  // They open the post which has the embed
+  if (isYouTube) {
+    return (
+      <div className={styles.container} style={style}>
+        {contents}
+      </div>
+    );
+  }
 
   if (isLink)
     return (

@@ -33,6 +33,23 @@
   opacity: 0.9;
 }
 
+/* YouTube play icon overlay */
+.playIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 32px;
+  color: #fff;
+
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+
+  /* Override the default svg styles from .container */
+  width: auto;
+  opacity: 1;
+}
+
 .fullsizeIcon {
   font-size: 2.5em;
   opacity: 0.3;

@@ -1,69 +1,92 @@
-# Profile UI Update for Voyager/DS9
+# YouTube Embed Feature for Voyager
 
-This update adds a Reddit/social media-style profile header with:
+This adds inline playable YouTube videos to your Voyager/DS9 Lemmy client.
 
-- **Banner Image** - Full-width banner at the top (or gradient placeholder)
-- **Avatar/Profile Picture** - Circular avatar overlapping the banner
-- **Display Name & Username** - With instance domain shown
-- **Stats Row** - Post count, comment count, and account age
-- **Bio** - User's bio text (if set)
-- **Horizontal Tabs** - Quick navigation to Posts, Comments, Saved, Hidden, etc.
+## Features
 
-## Files to Copy
+- ▶️ Inline playable YouTube videos in the post feed (large view)
+- 🎬 YouTube embeds in post detail view
+- 🖼️ YouTube thumbnail with play icon in compact view
+- 🔗 Supports multiple YouTube URL formats:
+  - `youtube.com/watch?v=VIDEO_ID`
+  - `youtu.be/VIDEO_ID`
+  - `youtube.com/embed/VIDEO_ID`
+  - `youtube.com/shorts/VIDEO_ID`
+  - `youtube-nocookie.com/embed/VIDEO_ID`
+- ⏱️ Timestamp support (e.g., `?t=120` or `?t=2m30s`)
+- 🔒 Privacy-focused: Uses `youtube-nocookie.com` for embeds
+- 📱 Responsive 16:9 aspect ratio
+- 🌫️ NSFW blur support
+- ⚡ Lazy loading: Thumbnail shown first, iframe loads on play
 
-### Files to `src/features/user/` (replace existing or add new):
+## Installation
 
-| File | Action |
-|------|--------|
-| `ProfileHeader.tsx` | **ADD** (new file) |
-| `ProfileHeader.module.css` | **ADD** (new file) |
-| `ProfileTabs.tsx` | **ADD** (new file) |
-| `ProfileTabs.module.css` | **ADD** (new file) |
-| `Profile.tsx` | **REPLACE** (overwrites existing) |
-| `Profile.module.css` | **ADD** (new file) |
+### New Files to ADD
 
-### Files to `src/routes/pages/profile/` (replace existing):
+Copy these files to your `src/` directory:
 
-| File | Action |
-|------|--------|
-| `ProfilePage.tsx` | **REPLACE** (overwrites existing) |
+```
+src/features/media/external/youtube/
+├── helpers.ts
+├── index.ts
+├── LargeFeedYouTubeMedia.module.css
+├── LargeFeedYouTubeMedia.tsx
+├── YouTubeEmbed.module.css
+└── YouTubeEmbed.tsx
+```
 
-## Installation Steps
+### Existing Files to REPLACE
 
-1. Navigate to your ds9 repository folder
-2. Copy all files from `src/features/user/` to your `src/features/user/` folder
-3. Copy `ProfilePage.tsx` from `src/routes/pages/profile/` to your `src/routes/pages/profile/` folder
-4. Stop the dev server if running
-5. Run `pnpm dev` to restart
+Replace these existing files with the modified versions:
 
-## Debugging
+```
+src/features/post/inFeed/large/media/LargeFeedPostMedia.tsx  (REPLACE)
+src/features/post/useIsPostUrlMedia.ts                       (REPLACE)
+src/features/post/inFeed/compact/Thumbnail.tsx               (REPLACE)
+src/features/post/inFeed/compact/Thumbnail.module.css        (REPLACE)
+src/features/post/detail/PostHeader.tsx                      (REPLACE)
+src/features/post/detail/PostHeader.module.css               (REPLACE)
+```
 
-This version includes console.log statements to help debug. After installing:
+## File Structure
 
-1. Open the browser console (F12 → Console tab)
-2. Go to your profile page
-3. Look for these logs:
-   - `[ProfilePage] State:` - Shows what data ProfilePage receives
-   - `[ProfilePage] Rendering Profile with:` - Shows data passed to Profile
-   - `[Profile] Component mounted with person:` - Shows Profile received data
-   - `[ProfileHeader] Rendering with user data:` - Shows the avatar/banner values
+```
+youtube-embed-feature/
+├── ADD/
+│   └── src/features/media/external/youtube/
+│       ├── helpers.ts              # YouTube URL parsing utilities
+│       ├── index.ts                # Exports
+│       ├── LargeFeedYouTubeMedia.module.css
+│       ├── LargeFeedYouTubeMedia.tsx  # Feed embed component
+│       ├── YouTubeEmbed.module.css
+│       └── YouTubeEmbed.tsx        # Main embed component
+│
+└── REPLACE/
+    └── src/features/post/
+        ├── useIsPostUrlMedia.ts    # Added YouTube detection
+        ├── detail/
+        │   ├── PostHeader.tsx      # Added YouTube embed in detail view
+        │   └── PostHeader.module.css
+        └── inFeed/
+            ├── compact/
+            │   ├── Thumbnail.tsx   # Added YouTube thumbnail with play icon
+            │   └── Thumbnail.module.css
+            └── large/media/
+                └── LargeFeedPostMedia.tsx  # Added YouTube case
+```
 
-If you see the `[ProfilePage]` logs but NOT the `[Profile]` logs, the Profile component isn't mounting.
-If you see `[Profile]` logs but NOT `[ProfileHeader]` logs, there's an issue with ProfileHeader.
-If avatar shows as `null` or `undefined`, the API isn't returning avatar data.
+## How It Works
 
-## What Changed
+1. **URL Detection**: `isYouTubeUrl()` in `helpers.ts` detects YouTube URLs
+2. **Feed Display**: `LargeFeedPostMedia.tsx` checks for YouTube URLs and renders `LargeFeedYouTubeMedia`
+3. **Embed Component**: `YouTubeEmbed.tsx` shows a thumbnail first, loads iframe when clicked
+4. **Post Detail**: `PostHeader.tsx` renders the YouTube embed in the full post view
+5. **Compact Thumbnail**: `Thumbnail.tsx` shows the YouTube thumbnail with a play icon overlay
 
-The old Profile component showed:
-- Stats (post count, comment count, account age)
-- Vertical list of links (Posts, Comments, Saved, Hidden, etc.)
-- Overview feed of recent posts/comments
+## Settings Integration
 
-The new Profile component shows:
-- Banner image (or gradient placeholder)
-- Large circular avatar
-- Display name and @username@instance
-- Horizontal stats row
-- Bio text
-- Horizontal tabs for navigation
-- Overview feed below
+The YouTube embed respects the existing `embedExternalMedia` setting, which is the same setting used for Redgifs. If users have disabled external media embedding, YouTube videos will show as regular links instead.
+
+## Privacy
+
+All YouTube embeds use `youtube-nocookie.com` which is YouTube's privacy-enhanced mode that doesn't store cookies or tracking information on the user's device unless they actually play the video.

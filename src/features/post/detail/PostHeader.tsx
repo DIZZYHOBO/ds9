@@ -11,6 +11,8 @@ import ModeratableItem, {
   ModeratableItemBannerOutlet,
 } from "#/features/moderation/ModeratableItem";
 import { getCanModerate } from "#/features/moderation/useCanModerate";
+import { isYouTubeUrl } from "#/features/media/external/youtube/helpers";
+import YouTubeEmbed from "#/features/media/external/youtube/YouTubeEmbed";
 import PostActions from "#/features/post/actions/PostActions";
 import Crosspost from "#/features/post/crosspost/Crosspost";
 import LargeFeedPostMedia from "#/features/post/inFeed/large/media/LargeFeedPostMedia";
@@ -68,6 +70,9 @@ export default function PostHeader({
   const tapToCollapse = useAppSelector(
     (state) => state.settings.general.comments.tapToCollapse,
   );
+  const embedExternalMedia = useAppSelector(
+    (state) => state.settings.appearance.posts.embedExternalMedia,
+  );
   const presentToast = useAppToast();
 
   const isPostUrlMedia = useIsPostUrlMedia();
@@ -75,6 +80,9 @@ export default function PostHeader({
     () => isPostUrlMedia(post),
     [post, isPostUrlMedia],
   );
+
+  // Check if this is a YouTube URL
+  const isYouTube = post.post.url && embedExternalMedia && isYouTubeUrl(post.post.url);
 
   function scrollToTitle() {
     const titleTop = (() => {
@@ -105,6 +113,16 @@ export default function PostHeader({
   const renderMedia = useCallback(() => {
     if (!post) return;
 
+    // YouTube embed in post detail
+    if (isYouTube) {
+      return (
+        <YouTubeEmbed
+          url={post.post.url!}
+          className={styles.youtubeEmbed}
+        />
+      );
+    }
+
     if (urlIsMedia) {
       return (
         <LargeFeedPostMedia
@@ -118,7 +136,7 @@ export default function PostHeader({
         />
       );
     }
-  }, [post, urlIsMedia, constrainHeight]);
+  }, [post, urlIsMedia, constrainHeight, isYouTube]);
 
   const renderText = useCallback(() => {
     if (!post) return;
@@ -136,7 +154,7 @@ export default function PostHeader({
     if (post.post.body?.trim() && urlIsMedia !== "from-body") {
       return (
         <>
-          {post.post.url && !urlIsMedia && <PostLink post={post} />}
+          {post.post.url && !urlIsMedia && !isYouTube && <PostLink post={post} />}
           <Markdown
             className={cx(styles.markdown, "collapse-md-margins")}
             id={post.post.ap_id}
@@ -147,10 +165,10 @@ export default function PostHeader({
       );
     }
 
-    if (post.post.url && !urlIsMedia) {
+    if (post.post.url && !urlIsMedia && !isYouTube) {
       return <PostLink className={styles.postLink} post={post} />;
     }
-  }, [post, crosspostUrl, urlIsMedia]);
+  }, [post, crosspostUrl, urlIsMedia, isYouTube]);
 
   const text = renderText();
 
@@ -160,6 +178,7 @@ export default function PostHeader({
         className={cx(styles.borderlessIonItem, className)}
         onClick={(e) => {
           if (e.target instanceof HTMLAnchorElement) return;
+          if (e.target instanceof HTMLIFrameElement) return; // Don't collapse when clicking YouTube
 
           if (
             tapToCollapse === OTapToCollapseType.Neither ||

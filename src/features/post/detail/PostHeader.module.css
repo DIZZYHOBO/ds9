@@ -15,6 +15,12 @@
   object-fit: contain;
 }
 
+.youtubeEmbed {
+  margin: 0 0 12px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 .markdown {
   margin: 0 0 15px 0;
 
