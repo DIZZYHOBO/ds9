@@ -9,14 +9,14 @@
 
   position: relative;
 
-  /* Rounded corners for post cards */
-  background: var(--ion-card-background, var(--ion-item-background, var(--ion-background-color)));
+  /* Rounded corners for post cards - uses theme background */
+  background: var(--ion-background-color-step-50, var(--ion-background-color));
   border-radius: 12px;
   margin: 0 8px;
   width: calc(100% - 16px);
 
-  /* Subtle shadow for depth */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  /* Subtle border to define card edges in dark mode */
+  border: 1px solid var(--ion-border-color, rgba(255, 255, 255, 0.1));
 }
 
 .header {
