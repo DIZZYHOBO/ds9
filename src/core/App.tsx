@@ -11,6 +11,7 @@ import "@ionic/react/css/float-elements.css";
 import "@ionic/react/css/padding.css";
 import "@ionic/react/css/text-alignment.css";
 import "@ionic/react/css/text-transformation.css";
+import "./compact-header.css";
 
 // Override Ionic variables
 import "./theme/variables.css";
