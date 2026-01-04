@@ -6,5 +6,6 @@
   --border-style: none;
   --background-hover: none;
 
-
+  /* Add spacing between posts */
+  margin-bottom: 12px;
 }

@@ -1,5 +1,5 @@
-import { IonIcon, IonItem, IonLabel, IonList } from "@ionic/react";
-import { ComponentProps, useState } from "react";
+import { IonIcon, IonItem, IonLabel, IonList, IonSpinner } from "@ionic/react";
+import { ComponentProps, useCallback, useEffect, useRef, useState } from "react";
 import { CommentView, PersonView } from "threadiverse";
 
 import { userHandleSelector } from "#/features/auth/authSelectors";
@@ -42,119 +42,150 @@ export default function Profile({ person, onPull }: ProfileProps) {
   });
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<ProfileTabType>("overview");
+  const [isTabLoading, setIsTabLoading] = useState(false);
+  const [feedKey, setFeedKey] = useState(0);
   const router = useOptimizedIonRouter();
   const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
+  const pendingTabRef = useRef<ProfileTabType | null>(null);
 
   const isSelf = getRemoteHandle(person.person) === myHandle;
 
+  // Create a wrapped fetch function that handles loading state
+  const createFetchFn = useCallback(
+    (baseFetchFn: FetchFn<PostCommentItem>): FetchFn<PostCommentItem> => {
+      return async (page_cursor, ...rest) => {
+        const result = await baseFetchFn(page_cursor, ...rest);
+
+        // After first fetch completes, clear loading state
+        if (isTabLoading) {
+          setIsTabLoading(false);
+        }
+
+        // If this was triggered by a tab change, update the active tab
+        if (pendingTabRef.current !== null) {
+          pendingTabRef.current = null;
+        }
+
+        return result;
+      };
+    },
+    [isTabLoading],
+  );
+
   // Fetch function for Overview (posts + comments mixed)
-  const fetchOverview: FetchFn<PostCommentItem> = async (
-    page_cursor,
-    ...rest
-  ) => {
-    const response = await client.listPersonContent(
-      {
-        page_cursor,
-        limit: LIMIT,
-        person_id: person.person.id,
-      },
-      ...rest,
-    );
+  const fetchOverview: FetchFn<PostCommentItem> = useCallback(
+    async (page_cursor, ...rest) => {
+      const response = await client.listPersonContent(
+        {
+          page_cursor,
+          limit: LIMIT,
+          person_id: person.person.id,
+        },
+        ...rest,
+      );
 
-    dispatch(
-      receivedComments(
-        response.data.filter((c) => !isPost(c)) as CommentView[],
-      ),
-    );
+      dispatch(
+        receivedComments(
+          response.data.filter((c) => !isPost(c)) as CommentView[],
+        ),
+      );
 
-    return response;
-  };
+      return response;
+    },
+    [client, person.person.id, dispatch],
+  );
 
   // Fetch function for Posts only
-  const fetchPosts: FetchFn<PostCommentItem> = async (page_cursor, ...rest) => {
-    const response = await client.listPersonContent(
-      {
-        page_cursor,
-        limit: LIMIT,
-        person_id: person.person.id,
-        type: "Posts",
-      },
-      ...rest,
-    );
+  const fetchPosts: FetchFn<PostCommentItem> = useCallback(
+    async (page_cursor, ...rest) => {
+      const response = await client.listPersonContent(
+        {
+          page_cursor,
+          limit: LIMIT,
+          person_id: person.person.id,
+          type: "Posts",
+        },
+        ...rest,
+      );
 
-    return response;
-  };
+      return response;
+    },
+    [client, person.person.id],
+  );
 
   // Fetch function for Comments only
-  const fetchComments: FetchFn<PostCommentItem> = async (
-    page_cursor,
-    ...rest
-  ) => {
-    const response = await client.listPersonContent(
-      {
-        page_cursor,
-        limit: LIMIT,
-        person_id: person.person.id,
-        type: "Comments",
-      },
-      ...rest,
-    );
+  const fetchComments: FetchFn<PostCommentItem> = useCallback(
+    async (page_cursor, ...rest) => {
+      const response = await client.listPersonContent(
+        {
+          page_cursor,
+          limit: LIMIT,
+          person_id: person.person.id,
+          type: "Comments",
+        },
+        ...rest,
+      );
 
-    dispatch(receivedComments(response.data as CommentView[]));
+      dispatch(receivedComments(response.data as CommentView[]));
 
-    return response;
-  };
+      return response;
+    },
+    [client, person.person.id, dispatch],
+  );
 
   // Fetch function for Saved
-  const fetchSaved: FetchFn<PostCommentItem> = async (page_cursor, ...rest) => {
-    const response = await client.listPersonSaved(
-      {
-        page_cursor,
-        person_id: person.person.id,
-        limit: LIMIT,
-      },
-      ...rest,
-    );
+  const fetchSaved: FetchFn<PostCommentItem> = useCallback(
+    async (page_cursor, ...rest) => {
+      const response = await client.listPersonSaved(
+        {
+          page_cursor,
+          person_id: person.person.id,
+          limit: LIMIT,
+        },
+        ...rest,
+      );
 
-    return response;
-  };
+      return response;
+    },
+    [client, person.person.id],
+  );
 
   // Fetch function for Upvoted
-  const fetchUpvoted: FetchFn<PostCommentItem> = async (
-    page_cursor,
-    ...rest
-  ) => {
-    const response = await client.listPersonLiked(
-      {
-        page_cursor,
-        type: "Upvoted",
-        limit: LIMIT,
-      },
-      ...rest,
-    );
+  const fetchUpvoted: FetchFn<PostCommentItem> = useCallback(
+    async (page_cursor, ...rest) => {
+      const response = await client.listPersonLiked(
+        {
+          page_cursor,
+          type: "Upvoted",
+          limit: LIMIT,
+        },
+        ...rest,
+      );
 
-    return response;
-  };
+      return response;
+    },
+    [client],
+  );
 
   // Fetch function for Downvoted
-  const fetchDownvoted: FetchFn<PostCommentItem> = async (
-    page_cursor,
-    ...rest
-  ) => {
-    const response = await client.listPersonLiked(
-      {
-        page_cursor,
-        type: "Downvoted",
-        limit: LIMIT,
-      },
-      ...rest,
-    );
+  const fetchDownvoted: FetchFn<PostCommentItem> = useCallback(
+    async (page_cursor, ...rest) => {
+      const response = await client.listPersonLiked(
+        {
+          page_cursor,
+          type: "Downvoted",
+          limit: LIMIT,
+        },
+        ...rest,
+      );
 
-    return response;
-  };
+      return response;
+    },
+    [client],
+  );
 
-  // Get the appropriate fetch function based on active tab
-  const getFetchFn = (): FetchFn<PostCommentItem> => {
+  // Get the base fetch function based on active tab
+  const getBaseFetchFn = useCallback((): FetchFn<PostCommentItem> => {
     switch (activeTab) {
       case "posts":
         return fetchPosts;
@@ -170,9 +201,34 @@ export default function Profile({ person, onPull }: ProfileProps) {
       default:
         return fetchOverview;
     }
-  };
+  }, [
+    activeTab,
+    fetchPosts,
+    fetchComments,
+    fetchSaved,
+    fetchUpvoted,
+    fetchDownvoted,
+    fetchOverview,
+  ]);
+
+  // Wrapped fetch function with loading state management
+  const getFetchFn = useCallback((): FetchFn<PostCommentItem> => {
+    const baseFn = getBaseFetchFn();
+    return async (page_cursor, ...rest) => {
+      const result = await baseFn(page_cursor, ...rest);
+
+      // Clear loading state after first fetch
+      if (isTabLoading) {
+        setIsTabLoading(false);
+      }
+
+      return result;
+    };
+  }, [getBaseFetchFn, isTabLoading]);
 
   const handleTabChange = (tab: ProfileTabType) => {
+    if (tab === activeTab) return;
+
     // Hidden tab navigates to a separate page (uses local DB, different data source)
     if (tab === "hidden") {
       const handle = getRemoteHandle(person.person);
@@ -180,7 +236,12 @@ export default function Profile({ person, onPull }: ProfileProps) {
       return;
     }
 
+    // Show loading indicator for tab content
+    setIsTabLoading(true);
+    pendingTabRef.current = tab;
     setActiveTab(tab);
+    // Increment key to force feed remount
+    setFeedKey((prev) => prev + 1);
   };
 
   const header = (
@@ -210,12 +271,19 @@ export default function Profile({ person, onPull }: ProfileProps) {
           </IonItem>
         </IonList>
       )}
+
+      {/* Inline loading indicator when switching tabs */}
+      {isTabLoading && (
+        <div className={styles.tabLoadingContainer}>
+          <IonSpinner className={styles.tabLoadingSpinner} />
+        </div>
+      )}
     </MaxWidthContainer>
   );
 
   return (
     <PostCommentFeed
-      key={activeTab} // Force re-mount when tab changes to reset feed state
+      key={feedKey}
       fetchFn={getFetchFn()}
       header={header}
       filterHiddenPosts={false}

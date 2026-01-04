@@ -1,92 +1,38 @@
-# YouTube Embed Feature for Voyager
+# DS9 UI Updates
 
-This adds inline playable YouTube videos to your Voyager/DS9 Lemmy client.
+This package contains UI modifications for the DS9 (Voyager fork) Lemmy client.
 
-## Features
+## Changes Included
 
-- ▶️ Inline playable YouTube videos in the post feed (large view)
-- 🎬 YouTube embeds in post detail view
-- 🖼️ YouTube thumbnail with play icon in compact view
-- 🔗 Supports multiple YouTube URL formats:
-  - `youtube.com/watch?v=VIDEO_ID`
-  - `youtu.be/VIDEO_ID`
-  - `youtube.com/embed/VIDEO_ID`
-  - `youtube.com/shorts/VIDEO_ID`
-  - `youtube-nocookie.com/embed/VIDEO_ID`
-- ⏱️ Timestamp support (e.g., `?t=120` or `?t=2m30s`)
-- 🔒 Privacy-focused: Uses `youtube-nocookie.com` for embeds
-- 📱 Responsive 16:9 aspect ratio
-- 🌫️ NSFW blur support
-- ⚡ Lazy loading: Thumbnail shown first, iframe loads on play
+### 1. Compact Icon-Only Tab Bar
+**File:** `src/routes/TabBar.module.css`
+- Removes text labels from bottom tab bar (icons only)
+- Reduces tab bar height to 40px (from ~56px)
+- Larger 28px icons for easy tapping
+- Adjusted badge positioning
+
+### 2. Rounded Post Cards with Spacing
+**Files:**
+- `src/features/post/inFeed/Post.module.css` - Adds 12px spacing between posts
+- `src/features/post/inFeed/large/LargePost.module.css` - Adds 12px rounded corners, theme-matching background, subtle border
+
+### 3. In-Place Profile Tabs with Inline Loading
+**Files:**
+- `src/features/user/Profile.tsx` - Tabs now switch content in place instead of navigating to new pages. Shows inline loading spinner under tabs instead of full-screen flash.
+- `src/features/user/ProfileTabs.tsx` - Tab component (unchanged, included for completeness)
+- `src/features/user/Profile.module.css` - Added styles for inline tab loading indicator
+
+**Tabs that work in-place:** Overview, Posts, Comments, Saved, Upvoted, Downvoted
+
+**"Hidden" tab** still navigates to separate page (uses local IndexedDB, different data source)
 
 ## Installation
 
-### New Files to ADD
+Replace the corresponding files in your ds9 repository with these updated versions:
 
-Copy these files to your `src/` directory:
-
-```
-src/features/media/external/youtube/
-├── helpers.ts
-├── index.ts
-├── LargeFeedYouTubeMedia.module.css
-├── LargeFeedYouTubeMedia.tsx
-├── YouTubeEmbed.module.css
-└── YouTubeEmbed.tsx
-```
-
-### Existing Files to REPLACE
-
-Replace these existing files with the modified versions:
-
-```
-src/features/post/inFeed/large/media/LargeFeedPostMedia.tsx  (REPLACE)
-src/features/post/useIsPostUrlMedia.ts                       (REPLACE)
-src/features/post/inFeed/compact/Thumbnail.tsx               (REPLACE)
-src/features/post/inFeed/compact/Thumbnail.module.css        (REPLACE)
-src/features/post/detail/PostHeader.tsx                      (REPLACE)
-src/features/post/detail/PostHeader.module.css               (REPLACE)
-```
-
-## File Structure
-
-```
-youtube-embed-feature/
-├── ADD/
-│   └── src/features/media/external/youtube/
-│       ├── helpers.ts              # YouTube URL parsing utilities
-│       ├── index.ts                # Exports
-│       ├── LargeFeedYouTubeMedia.module.css
-│       ├── LargeFeedYouTubeMedia.tsx  # Feed embed component
-│       ├── YouTubeEmbed.module.css
-│       └── YouTubeEmbed.tsx        # Main embed component
-│
-└── REPLACE/
-    └── src/features/post/
-        ├── useIsPostUrlMedia.ts    # Added YouTube detection
-        ├── detail/
-        │   ├── PostHeader.tsx      # Added YouTube embed in detail view
-        │   └── PostHeader.module.css
-        └── inFeed/
-            ├── compact/
-            │   ├── Thumbnail.tsx   # Added YouTube thumbnail with play icon
-            │   └── Thumbnail.module.css
-            └── large/media/
-                └── LargeFeedPostMedia.tsx  # Added YouTube case
-```
-
-## How It Works
-
-1. **URL Detection**: `isYouTubeUrl()` in `helpers.ts` detects YouTube URLs
-2. **Feed Display**: `LargeFeedPostMedia.tsx` checks for YouTube URLs and renders `LargeFeedYouTubeMedia`
-3. **Embed Component**: `YouTubeEmbed.tsx` shows a thumbnail first, loads iframe when clicked
-4. **Post Detail**: `PostHeader.tsx` renders the YouTube embed in the full post view
-5. **Compact Thumbnail**: `Thumbnail.tsx` shows the YouTube thumbnail with a play icon overlay
-
-## Settings Integration
-
-The YouTube embed respects the existing `embedExternalMedia` setting, which is the same setting used for Redgifs. If users have disabled external media embedding, YouTube videos will show as regular links instead.
-
-## Privacy
-
-All YouTube embeds use `youtube-nocookie.com` which is YouTube's privacy-enhanced mode that doesn't store cookies or tracking information on the user's device unless they actually play the video.
+1. `src/routes/TabBar.module.css`
+2. `src/features/post/inFeed/Post.module.css`
+3. `src/features/post/inFeed/large/LargePost.module.css`
+4. `src/features/user/Profile.tsx`
+5. `src/features/user/ProfileTabs.tsx`
+6. `src/features/user/Profile.module.css`
