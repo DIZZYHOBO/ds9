@@ -1,5 +1,5 @@
 import { IonIcon, IonItem, IonLabel, IonList, IonSpinner } from "@ionic/react";
-import { ComponentProps, useCallback, useEffect, useRef, useState } from "react";
+import { ComponentProps, useCallback, useRef, useState } from "react";
 import { CommentView, PersonView } from "threadiverse";
 
 import { userHandleSelector } from "#/features/auth/authSelectors";
@@ -49,28 +49,6 @@ export default function Profile({ person, onPull }: ProfileProps) {
   const pendingTabRef = useRef<ProfileTabType | null>(null);
 
   const isSelf = getRemoteHandle(person.person) === myHandle;
-
-  // Create a wrapped fetch function that handles loading state
-  const createFetchFn = useCallback(
-    (baseFetchFn: FetchFn<PostCommentItem>): FetchFn<PostCommentItem> => {
-      return async (page_cursor, ...rest) => {
-        const result = await baseFetchFn(page_cursor, ...rest);
-
-        // After first fetch completes, clear loading state
-        if (isTabLoading) {
-          setIsTabLoading(false);
-        }
-
-        // If this was triggered by a tab change, update the active tab
-        if (pendingTabRef.current !== null) {
-          pendingTabRef.current = null;
-        }
-
-        return result;
-      };
-    },
-    [isTabLoading],
-  );
 
   // Fetch function for Overview (posts + comments mixed)
   const fetchOverview: FetchFn<PostCommentItem> = useCallback(
@@ -282,13 +260,15 @@ export default function Profile({ person, onPull }: ProfileProps) {
   );
 
   return (
-    <PostCommentFeed
-      key={feedKey}
-      fetchFn={getFetchFn()}
-      header={header}
-      filterHiddenPosts={false}
-      filterKeywordsAndWebsites={false}
-      onPull={onPull}
-    />
+    <div className={styles.profileFeedWrapper}>
+      <PostCommentFeed
+        key={feedKey}
+        fetchFn={getFetchFn()}
+        header={header}
+        filterHiddenPosts={false}
+        filterKeywordsAndWebsites={false}
+        onPull={onPull}
+      />
+    </div>
   );
 }
