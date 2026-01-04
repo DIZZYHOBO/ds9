@@ -1,13 +1,5 @@
 import { IonIcon, IonItem, IonLabel, IonList } from "@ionic/react";
-import {
-  albumsOutline,
-  arrowDown,
-  arrowUp,
-  bookmarkOutline,
-  chatbubbleOutline,
-  eyeOffOutline,
-} from "ionicons/icons";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { CommentView, PersonView } from "threadiverse";
 
 import { userHandleSelector } from "#/features/auth/authSelectors";
@@ -53,6 +45,15 @@ export default function Profile({ person, onPull }: ProfileProps) {
 
   const isSelf = getRemoteHandle(person.person) === myHandle;
 
+  // Debug logging
+  useEffect(() => {
+    console.log("[Profile] Component mounted with person:", {
+      person: person.person,
+      counts: person.counts,
+      isSelf,
+    });
+  }, [person, isSelf]);
+
   const fetchFn: FetchFn<PostCommentItem> = async (page_cursor, ...rest) => {
     const response = await client.listPersonContent(
       {
@@ -90,7 +91,6 @@ export default function Profile({ person, onPull }: ProfileProps) {
       hidden: `/u/${handle}/hidden`,
     };
 
-    // Use window.location for navigation since we're inside the feed
     window.location.href = buildGeneralBrowseLink(routes[tab]);
   };
 

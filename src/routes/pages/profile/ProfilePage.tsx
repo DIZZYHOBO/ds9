@@ -6,7 +6,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { swapHorizontalSharp } from "ionicons/icons";
-import { use } from "react";
+import { use, useEffect } from "react";
 
 import {
   accountsListEmptySelector,
@@ -41,10 +41,28 @@ export default function ProfilePage() {
 
   const title = handle ?? connectedInstance;
 
+  // Debug logging for ProfilePage
+  useEffect(() => {
+    console.log("[ProfilePage] State:", {
+      handle,
+      loggedIn,
+      myPerson: myPerson,
+      localUserView: myPerson?.local_user_view,
+      person: myPerson?.local_user_view?.person,
+      avatar: myPerson?.local_user_view?.person?.avatar,
+      banner: myPerson?.local_user_view?.person?.banner,
+    });
+  }, [handle, loggedIn, myPerson]);
+
   function renderContent() {
     if (!handle) return <LoggedOut />;
 
     if (!myPerson) return <CenteredSpinner />;
+
+    console.log("[ProfilePage] Rendering Profile with:", {
+      person: myPerson.local_user_view.person,
+      counts: myPerson.local_user_view.counts,
+    });
 
     return (
       <Profile

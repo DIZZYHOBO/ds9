@@ -1,5 +1,6 @@
 import { IonIcon } from "@ionic/react";
-import { calendarOutline } from "ionicons/icons";
+import { calendarOutline, personCircle } from "ionicons/icons";
+import { useEffect, useState } from "react";
 import { PersonView } from "threadiverse";
 
 import Ago from "#/features/labels/Ago";
@@ -13,24 +14,57 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ person }: ProfileHeaderProps) {
   const { person: user, counts } = person;
+  const [avatarError, setAvatarError] = useState(false);
+  const [bannerError, setBannerError] = useState(false);
 
   const displayName = user.display_name || user.name;
   const username = user.name;
-  const avatarUrl = user.avatar;
-  const bannerUrl = user.banner;
-  const bio = user.bio;
-  const instanceDomain = new URL(user.actor_id).hostname;
+
+  // Access avatar and banner - these are optional fields
+  const avatarUrl = user.avatar ?? undefined;
+  const bannerUrl = user.banner ?? undefined;
+  const bio = user.bio ?? undefined;
+
+  // Debug logging
+  useEffect(() => {
+    console.log("[ProfileHeader] Rendering with user data:", {
+      name: user.name,
+      display_name: user.display_name,
+      avatar: user.avatar,
+      banner: user.banner,
+      bio: user.bio,
+      actor_id: user.actor_id,
+      fullUserObject: user,
+    });
+  }, [user]);
+
+  // Extract instance domain from actor_id
+  let instanceDomain = "";
+  try {
+    if (user.actor_id) {
+      instanceDomain = new URL(user.actor_id).hostname;
+    }
+  } catch {
+    instanceDomain = "unknown";
+  }
+
+  const showAvatar = Boolean(avatarUrl) && !avatarError;
+  const showBanner = Boolean(bannerUrl) && !bannerError;
 
   return (
     <div className={styles.profileHeader}>
       {/* Banner Section */}
       <div className={styles.bannerContainer}>
-        {bannerUrl ? (
+        {showBanner ? (
           <img
             src={bannerUrl}
             alt=""
             className={styles.bannerImage}
             loading="lazy"
+            onError={() => {
+              console.log("[ProfileHeader] Banner failed to load:", bannerUrl);
+              setBannerError(true);
+            }}
           />
         ) : (
           <div className={styles.bannerPlaceholder} />
@@ -38,16 +72,23 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
 
         {/* Avatar - positioned to overlap banner */}
         <div className={styles.avatarContainer}>
-          {avatarUrl ? (
+          {showAvatar ? (
             <img
               src={avatarUrl}
               alt={`${displayName}'s avatar`}
               className={styles.avatar}
               loading="lazy"
+              onError={() => {
+                console.log(
+                  "[ProfileHeader] Avatar failed to load:",
+                  avatarUrl,
+                );
+                setAvatarError(true);
+              }}
             />
           ) : (
             <div className={styles.avatarPlaceholder}>
-              {displayName.charAt(0).toUpperCase()}
+              <IonIcon icon={personCircle} className={styles.avatarIcon} />
             </div>
           )}
         </div>
@@ -57,7 +98,8 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
       <div className={styles.userInfo}>
         <h1 className={styles.displayName}>{displayName}</h1>
         <p className={styles.username}>
-          @{username}@{instanceDomain}
+          @{username}
+          {instanceDomain && `@${instanceDomain}`}
         </p>
 
         {/* Stats Row */}
