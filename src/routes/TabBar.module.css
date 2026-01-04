@@ -1,25 +1,56 @@
 .tabBar {
+  /* Reduce tab bar height by 50% (default is ~56px, now ~28px) */
+  --height: 28px;
+  height: 28px;
+
+  /* Hide all text labels - icons only */
+  ion-label {
+    display: none !important;
+  }
+
+  /* Adjust tab button padding for compact size */
+  ion-tab-button {
+    --padding-top: 4px;
+    --padding-bottom: 4px;
+    min-height: 28px;
+  }
+
+  /* Slightly smaller icons for compact bar */
+  ion-tab-button ion-icon {
+    font-size: 22px !important;
+  }
+
+  /* Adjust badge positioning for icon-only tabs */
+  ion-badge {
+    position: absolute;
+    top: 2px;
+    margin-left: 8px !important;
+    font-size: 10px;
+    padding: 2px 4px;
+    min-width: 14px;
+    height: 14px;
+    line-height: 10px;
+  }
+
+  /* Landscape mode adjustments (override original) */
   @media (orientation: landscape) and (max-height: 450px) {
-    height: 36px;
+    height: 28px;
 
     ion-badge {
-      inset-inline-start: calc(70% + 6px);
+      inset-inline-start: calc(50% + 8px);
 
       &:global(.md) {
-        inset-inline-start: calc(75% + 6px);
+        inset-inline-start: calc(50% + 8px);
       }
     }
 
     ion-tab-button {
       flex-direction: row;
-
-      > ion-label {
-        margin-bottom: 0;
-      }
+      justify-content: center;
 
       > ion-icon {
-        font-size: 22px !important;
-        margin-right: 5px;
+        font-size: 20px !important;
+        margin-right: 0;
       }
     }
   }
