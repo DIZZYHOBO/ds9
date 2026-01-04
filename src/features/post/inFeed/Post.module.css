@@ -7,5 +7,6 @@
   --background-hover: none;
 
   /* Add spacing between posts */
-  margin-bottom: 12px;
+  margin-bottom: 6px;
+    margin-top: 6px;
 }
