@@ -5,6 +5,7 @@ import { PersonView } from "threadiverse";
 
 import Ago from "#/features/labels/Ago";
 import { formatNumber } from "#/helpers/number";
+import { useAppSelector } from "#/store";
 
 import styles from "./ProfileHeader.module.css";
 
@@ -16,6 +17,11 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
   const { person: user, counts } = person;
   const [avatarError, setAvatarError] = useState(false);
   const [bannerError, setBannerError] = useState(false);
+
+  // Get the connected instance to build the image proxy URL
+  const connectedInstance = useAppSelector(
+    (state) => state.auth.connectedInstance,
+  );
 
   const displayName = user.display_name || user.name;
   const username = user.name;
@@ -34,9 +40,9 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
       banner: user.banner,
       bio: user.bio,
       actor_id: user.actor_id,
-      fullUserObject: user,
+      connectedInstance,
     });
-  }, [user]);
+  }, [user, connectedInstance]);
 
   // Extract instance domain from actor_id
   let instanceDomain = "";
@@ -48,8 +54,33 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
     instanceDomain = "unknown";
   }
 
-  const showAvatar = Boolean(avatarUrl) && !avatarError;
-  const showBanner = Boolean(bannerUrl) && !bannerError;
+  // Build proxied image URL to avoid CORS issues
+  // Uses the connected instance's image proxy
+  const getProxiedImageUrl = (originalUrl: string | undefined) => {
+    if (!originalUrl) return undefined;
+    if (!connectedInstance) return originalUrl;
+
+    // Check if the image is already from the connected instance (no proxy needed)
+    try {
+      const imageHost = new URL(originalUrl).hostname;
+      if (imageHost === connectedInstance) {
+        return originalUrl;
+      }
+    } catch {
+      return originalUrl;
+    }
+
+    // Use the Lemmy image proxy
+    const proxyUrl = `https://${connectedInstance}/api/v3/image_proxy?url=${encodeURIComponent(originalUrl)}`;
+    console.log("[ProfileHeader] Proxying image:", originalUrl, "->", proxyUrl);
+    return proxyUrl;
+  };
+
+  const proxiedAvatarUrl = getProxiedImageUrl(avatarUrl);
+  const proxiedBannerUrl = getProxiedImageUrl(bannerUrl);
+
+  const showAvatar = Boolean(proxiedAvatarUrl) && !avatarError;
+  const showBanner = Boolean(proxiedBannerUrl) && !bannerError;
 
   return (
     <div className={styles.profileHeader}>
@@ -57,12 +88,15 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
       <div className={styles.bannerContainer}>
         {showBanner ? (
           <img
-            src={bannerUrl}
+            src={proxiedBannerUrl}
             alt=""
             className={styles.bannerImage}
             loading="lazy"
             onError={() => {
-              console.log("[ProfileHeader] Banner failed to load:", bannerUrl);
+              console.log(
+                "[ProfileHeader] Banner failed to load:",
+                proxiedBannerUrl,
+              );
               setBannerError(true);
             }}
           />
@@ -74,14 +108,14 @@ export default function ProfileHeader({ person }: ProfileHeaderProps) {
         <div className={styles.avatarContainer}>
           {showAvatar ? (
             <img
-              src={avatarUrl}
+              src={proxiedAvatarUrl}
               alt={`${displayName}'s avatar`}
               className={styles.avatar}
               loading="lazy"
               onError={() => {
                 console.log(
                   "[ProfileHeader] Avatar failed to load:",
-                  avatarUrl,
+                  proxiedAvatarUrl,
                 );
                 setAvatarError(true);
               }}
