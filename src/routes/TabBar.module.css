@@ -1,7 +1,7 @@
 .tabBar {
-  /* Reduce tab bar height by 50% (default is ~56px, now ~28px) */
-  --height: 28px;
-  height: 28px;
+  /* Reduced height but still usable (~40px instead of ~56px) */
+  --height: 40px;
+  height: 40px;
 
   /* Hide all text labels - icons only */
   ion-label {
@@ -10,37 +10,37 @@
 
   /* Adjust tab button padding for compact size */
   ion-tab-button {
-    --padding-top: 4px;
-    --padding-bottom: 4px;
-    min-height: 28px;
+    --padding-top: 6px;
+    --padding-bottom: 6px;
+    min-height: 40px;
   }
 
-  /* Slightly smaller icons for compact bar */
+  /* Larger icons for better tap targets */
   ion-tab-button ion-icon {
-    font-size: 22px !important;
+    font-size: 28px !important;
   }
 
   /* Adjust badge positioning for icon-only tabs */
   ion-badge {
     position: absolute;
-    top: 2px;
-    margin-left: 8px !important;
-    font-size: 10px;
-    padding: 2px 4px;
-    min-width: 14px;
-    height: 14px;
-    line-height: 10px;
+    top: 4px;
+    margin-left: 12px !important;
+    font-size: 11px;
+    padding: 2px 5px;
+    min-width: 16px;
+    height: 16px;
+    line-height: 12px;
   }
 
-  /* Landscape mode adjustments (override original) */
+  /* Landscape mode adjustments */
   @media (orientation: landscape) and (max-height: 450px) {
-    height: 28px;
+    height: 36px;
 
     ion-badge {
-      inset-inline-start: calc(50% + 8px);
+      inset-inline-start: calc(50% + 10px);
 
       &:global(.md) {
-        inset-inline-start: calc(50% + 8px);
+        inset-inline-start: calc(50% + 10px);
       }
     }
 
@@ -49,7 +49,7 @@
       justify-content: center;
 
       > ion-icon {
-        font-size: 20px !important;
+        font-size: 24px !important;
         margin-right: 0;
       }
     }
