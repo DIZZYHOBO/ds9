@@ -1,0 +1,236 @@
+/**
+ * Compact Header Styles
+ * 
+ * This file reduces the height of the top navigation bar (ion-header/ion-toolbar)
+ * to approximately half the default size, and scales down all icons, text, and
+ * buttons proportionally.
+ * 
+ * Add this file to your project and import it in your main CSS/SCSS file or
+ * in your App.tsx/main.tsx
+ */
+
+/* ============================================
+   TOOLBAR HEIGHT REDUCTION
+   ============================================ */
+
+/* Reduce the minimum height of toolbars */
+ion-toolbar {
+  --min-height: 28px;
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+/* iOS specific adjustments */
+.ios ion-toolbar {
+  --min-height: 28px;
+}
+
+/* Android/Material Design specific adjustments */
+.md ion-toolbar {
+  --min-height: 28px;
+}
+
+/* ============================================
+   TITLE STYLING
+   ============================================ */
+
+ion-toolbar ion-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+/* Large title mode - also reduce */
+ion-header ion-toolbar ion-title.title-large {
+  font-size: 1.1rem;
+}
+
+/* ============================================
+   BUTTON SIZING
+   ============================================ */
+
+/* Reduce toolbar button sizes */
+ion-toolbar ion-button {
+  --padding-start: 4px;
+  --padding-end: 4px;
+  --padding-top: 2px;
+  --padding-bottom: 2px;
+  height: 26px;
+  font-size: 0.8rem;
+}
+
+/* Back button specifically */
+ion-toolbar ion-back-button {
+  --min-height: 26px;
+  --min-width: 26px;
+  --icon-font-size: 1.1rem;
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+/* Menu button */
+ion-toolbar ion-menu-button {
+  --padding-start: 4px;
+  --padding-end: 4px;
+  width: 28px;
+  height: 28px;
+}
+
+/* ============================================
+   ICON SIZING
+   ============================================ */
+
+/* Reduce icon sizes in the toolbar */
+ion-toolbar ion-icon {
+  font-size: 1.1rem;
+}
+
+/* Icons inside buttons */
+ion-toolbar ion-button ion-icon {
+  font-size: 1rem;
+}
+
+/* Icon-only buttons */
+ion-toolbar ion-button[fill="clear"] ion-icon,
+ion-toolbar ion-button[slot="icon-only"] ion-icon {
+  font-size: 1.1rem;
+}
+
+/* ============================================
+   BUTTONS CONTAINER (ion-buttons)
+   ============================================ */
+
+ion-toolbar ion-buttons {
+  margin: 0;
+}
+
+ion-toolbar ion-buttons ion-button {
+  margin: 0 1px;
+}
+
+/* ============================================
+   SEARCHBAR IN TOOLBAR
+   ============================================ */
+
+ion-toolbar ion-searchbar {
+  --height: 28px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: 0.85rem;
+}
+
+ion-toolbar ion-searchbar .searchbar-input {
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   SEGMENT IN TOOLBAR
+   ============================================ */
+
+ion-toolbar ion-segment {
+  --min-height: 26px;
+}
+
+ion-toolbar ion-segment-button {
+  --padding-top: 2px;
+  --padding-bottom: 2px;
+  font-size: 0.8rem;
+  min-height: 26px;
+}
+
+/* ============================================
+   SAFE AREA / NOTCH HANDLING
+   ============================================ */
+
+/* Preserve safe area padding but reduce extra padding */
+ion-header ion-toolbar:first-of-type {
+  padding-top: var(--ion-safe-area-top, 0);
+}
+
+/* Reduce extra iOS padding that gets added */
+.ios ion-header ion-toolbar:first-of-type {
+  padding-top: var(--ion-safe-area-top, 0);
+}
+
+/* ============================================
+   AVATAR/PROFILE IMAGES IN HEADER
+   ============================================ */
+
+ion-toolbar ion-avatar {
+  width: 24px;
+  height: 24px;
+}
+
+ion-toolbar img.header-avatar,
+ion-toolbar .header-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+/* ============================================
+   BADGE IN TOOLBAR
+   ============================================ */
+
+ion-toolbar ion-badge {
+  font-size: 0.65rem;
+  padding: 2px 4px;
+}
+
+/* ============================================
+   CHIP IN TOOLBAR
+   ============================================ */
+
+ion-toolbar ion-chip {
+  height: 22px;
+  font-size: 0.75rem;
+}
+
+/* ============================================
+   LABEL IN TOOLBAR
+   ============================================ */
+
+ion-toolbar ion-label {
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   HEADER SHADOW/BORDER
+   ============================================ */
+
+/* Optionally reduce or remove the header shadow for a cleaner look */
+ion-header::after {
+  background-image: none;
+}
+
+/* Or use a subtle border instead */
+ion-header.header-md::after {
+  background: none;
+  border-bottom: 1px solid var(--ion-color-step-150, rgba(0, 0, 0, 0.1));
+  height: 1px;
+}
+
+/* ============================================
+   SPECIFIC VOYAGER OVERRIDES
+   ============================================ */
+
+/* If Voyager uses specific classes, add overrides here */
+ion-toolbar .toolbar-title {
+  font-size: 0.95rem;
+}
+
+/* Header container adjustments */
+ion-header {
+  /* Ensure the header doesn't have extra padding */
+}
+
+/* Collapse toolbar animation heights */
+ion-header[collapse="condense"] ion-toolbar {
+  --min-height: 28px;
+}
+
+ion-header[collapse="condense"] ion-toolbar:first-of-type {
+  --min-height: 28px;
+}
