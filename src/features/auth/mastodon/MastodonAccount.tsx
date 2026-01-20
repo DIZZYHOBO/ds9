@@ -6,15 +6,13 @@ import {
   IonLabel,
   IonRadio,
   IonReorder,
+  IonText,
 } from "@ionic/react";
 
 import { RemoveItemButton } from "#/features/shared/ListEditor";
-import MastodonAvatar from "#/features/mastodon/shared/MastodonAvatar";
 import { useAppDispatch } from "#/store";
 
 import { MastodonAccountCredential, logoutMastodonAccount } from "./mastodonAuthSlice";
-
-import styles from "./MastodonAccount.module.css";
 
 interface MastodonAccountProps {
   editing: boolean;
@@ -35,11 +33,9 @@ export default function MastodonAccount({
   }
 
   const label = (
-    <div className={styles.accountLabel}>
-      <MastodonAvatar account={account.account} size="small" />
-      <span className={styles.handle}>{handle}</span>
-      <span className={styles.badge}>Mastodon</span>
-    </div>
+    <>
+      {handle} <IonText color="tertiary">(Mastodon)</IonText>
+    </>
   );
 
   return (
