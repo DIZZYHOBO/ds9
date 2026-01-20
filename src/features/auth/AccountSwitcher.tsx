@@ -92,15 +92,27 @@ function AccountSwitcherContents({
   );
 
   // Determine which account is currently active (Lemmy or Mastodon)
-  const [selectedAccount, setSelectedAccount] = useState(
-    _activeHandle ?? appActiveHandle,
-  );
+  // Mastodon handles need the "mastodon:" prefix for the radio group
+  const getInitialSelectedAccount = () => {
+    if (_activeHandle) return _activeHandle;
+    if (appActiveHandle) return appActiveHandle;
+    if (mastodonActiveHandle) return `mastodon:${mastodonActiveHandle}`;
+    return undefined;
+  };
+
+  const [selectedAccount, setSelectedAccount] = useState(getInitialSelectedAccount);
 
   const { editing } = use(ListEditorContext);
 
   useEffect(() => {
-    setSelectedAccount(_activeHandle ?? appActiveHandle);
-  }, [_activeHandle, appActiveHandle]);
+    if (_activeHandle) {
+      setSelectedAccount(_activeHandle);
+    } else if (appActiveHandle) {
+      setSelectedAccount(appActiveHandle);
+    } else if (mastodonActiveHandle) {
+      setSelectedAccount(`mastodon:${mastodonActiveHandle}`);
+    }
+  }, [_activeHandle, appActiveHandle, mastodonActiveHandle]);
 
   const hasAnyAccounts = useMemo(
     () => (lemmyAccounts?.length ?? 0) > 0 || mastodonAccounts.length > 0,
