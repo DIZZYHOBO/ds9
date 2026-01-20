@@ -1,5 +1,9 @@
 import {
   differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  differenceInSeconds,
+  format,
   getYear,
   isSameDay,
   isSameYear,
@@ -47,4 +51,41 @@ export function calculateNewAccountDays(published: string): number | undefined {
   if (days < 0 || days > 30) return;
 
   return days;
+}
+
+/**
+ * Format a date string as a relative time (e.g., "5m", "2h", "3d")
+ *
+ * @param dateString ISO date string
+ * @returns Formatted relative time string
+ */
+export function formatRelative(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+
+  const seconds = differenceInSeconds(now, date);
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+
+  const minutes = differenceInMinutes(now, date);
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+
+  const hours = differenceInHours(now, date);
+  if (hours < 24) {
+    return `${hours}h`;
+  }
+
+  const days = differenceInDays(now, date);
+  if (days < 7) {
+    return `${days}d`;
+  }
+
+  if (isSameYear(date, now)) {
+    return format(date, "MMM d");
+  }
+
+  return format(date, "MMM d, yyyy");
 }

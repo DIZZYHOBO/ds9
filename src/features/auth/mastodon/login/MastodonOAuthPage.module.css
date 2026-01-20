@@ -1,0 +1,47 @@
+.steps {
+  padding: 0 1rem;
+}
+
+.step {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ion-color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.stepContent {
+  flex: 1;
+  padding-top: 2px;
+}
+
+.stepTitle {
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.stepDescription {
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.authButton {
+  margin: 0;
+}
+
+.codeInputList {
+  margin: 0.5rem 0 0 0;
+}

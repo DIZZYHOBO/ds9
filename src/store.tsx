@@ -14,6 +14,8 @@ import { handleSelector } from "./features/auth/authSelectors";
 import authSlice from "./features/auth/authSlice";
 import joinSlice from "./features/auth/login/join/joinSlice";
 import pickJoinServerSlice from "./features/auth/login/pickJoinServer/pickJoinServerSlice";
+import mastodonAuthSlice from "./features/auth/mastodon/mastodonAuthSlice";
+import mastodonStatusSlice from "./features/mastodon/status/mastodonStatusSlice";
 import siteSlice from "./features/auth/siteSlice";
 import commentSlice from "./features/comment/commentSlice";
 import communitySlice, {
@@ -68,6 +70,8 @@ const store = configureStore({
     inbox: inboxSlice,
     instances: instancesSlice,
     join: joinSlice,
+    mastodonAuth: mastodonAuthSlice,
+    mastodonStatus: mastodonStatusSlice,
     migration: migrationSlice,
     mod: modSlice,
     network: networkSlice,

@@ -1,0 +1,9 @@
+.item {
+  --inner-padding-end: 0;
+  --padding-start: 0;
+  --background: none;
+
+  &::part(native) {
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,19 @@
+.accountLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.handle {
+  flex: 1;
+}
+
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  background: var(--ion-color-tertiary);
+  color: var(--ion-color-tertiary-contrast);
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
