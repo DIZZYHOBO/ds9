@@ -19,7 +19,7 @@ import {
   activeMastodonAccountSelector,
   mastodonAccountsSelector,
 } from "#/features/auth/mastodon/mastodonAuthSlice";
-import MastodonHomePage from "#/features/mastodon/pages/MastodonHomePage";
+import MastodonProfilePage from "#/features/mastodon/pages/MastodonProfilePage";
 import AppHeader from "#/features/shared/AppHeader";
 import { CenteredSpinner } from "#/features/shared/CenteredSpinner";
 import DocumentTitle from "#/features/shared/DocumentTitle";
@@ -74,7 +74,7 @@ export default function ProfilePage() {
   function renderContent() {
     // Show Mastodon content if Mastodon account is active
     if (showMastodon) {
-      return <MastodonHomePage />;
+      return <MastodonProfilePage />;
     }
 
     if (!handle) return <LoggedOut />;

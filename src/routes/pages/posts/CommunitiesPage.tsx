@@ -2,13 +2,16 @@ import { IonButtons, IonTitle, IonToolbar } from "@ionic/react";
 import { memo } from "react";
 import { useParams } from "react-router";
 
+import { activeMastodonAccountSelector } from "#/features/auth/mastodon/mastodonAuthSlice";
 import CommunitiesList from "#/features/community/list/CommunitiesList";
 import CommunitiesListRedirectBootstrapper from "#/features/community/list/CommunitiesListRedirectBootstrapper";
 import { ConfirmLeaveFeedPrompt } from "#/features/community/list/ConfirmLeaveFeedPrompt";
 import CommunitiesMoreActions from "#/features/community/list/InstanceMoreActions";
+import MastodonHomePage from "#/features/mastodon/pages/MastodonHomePage";
 import AppHeader from "#/features/shared/AppHeader";
 import { AppPage } from "#/helpers/AppPage";
 import FeedContent from "#/routes/pages/shared/FeedContent";
+import { useAppSelector } from "#/store";
 
 interface CommunitiesPageParams {
   actor: string;
@@ -16,6 +19,12 @@ interface CommunitiesPageParams {
 
 export default function CommunitiesPage() {
   const { actor } = useParams<CommunitiesPageParams>();
+  const activeMastodonAccount = useAppSelector(activeMastodonAccountSelector);
+
+  // Show Mastodon timeline when Mastodon account is active
+  if (activeMastodonAccount) {
+    return <MastodonHomePage />;
+  }
 
   return <CommunitiesPageContent actor={actor} />;
 }
