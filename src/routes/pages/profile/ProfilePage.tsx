@@ -15,6 +15,11 @@ import {
 } from "#/features/auth/authSelectors";
 import { SharedDialogContext } from "#/features/auth/SharedDialogContext";
 import { getSite } from "#/features/auth/siteSlice";
+import {
+  activeMastodonAccountSelector,
+  mastodonAccountsSelector,
+} from "#/features/auth/mastodon/mastodonAuthSlice";
+import MastodonHomePage from "#/features/mastodon/pages/MastodonHomePage";
 import AppHeader from "#/features/shared/AppHeader";
 import { CenteredSpinner } from "#/features/shared/CenteredSpinner";
 import DocumentTitle from "#/features/shared/DocumentTitle";
@@ -35,11 +40,21 @@ export default function ProfilePage() {
   const loggedIn = useAppSelector(loggedInSelector);
   const dispatch = useAppDispatch();
 
+  // Mastodon account state
+  const mastodonAccounts = useAppSelector(mastodonAccountsSelector);
+  const activeMastodonAccount = useAppSelector(activeMastodonAccountSelector);
+
   const { presentAccountSwitcher } = use(SharedDialogContext);
 
   const myPerson = useAppSelector((state) => state.site.response?.my_user);
 
-  const title = handle ?? connectedInstance;
+  // Check if we should show Mastodon content
+  const showMastodon = !!activeMastodonAccount;
+  const hasAnyAccounts = !accountsListEmpty || mastodonAccounts.length > 0;
+
+  const title = showMastodon
+    ? `${activeMastodonAccount.account.username}@${activeMastodonAccount.instance}`
+    : handle ?? connectedInstance;
 
   // Debug logging for ProfilePage
   useEffect(() => {
@@ -51,10 +66,17 @@ export default function ProfilePage() {
       person: myPerson?.local_user_view?.person,
       avatar: myPerson?.local_user_view?.person?.avatar,
       banner: myPerson?.local_user_view?.person?.banner,
+      showMastodon,
+      activeMastodonAccount: activeMastodonAccount?.account?.username,
     });
-  }, [handle, loggedIn, myPerson]);
+  }, [handle, loggedIn, myPerson, showMastodon, activeMastodonAccount]);
 
   function renderContent() {
+    // Show Mastodon content if Mastodon account is active
+    if (showMastodon) {
+      return <MastodonHomePage />;
+    }
+
     if (!handle) return <LoggedOut />;
 
     if (!myPerson) return <CenteredSpinner />;
@@ -79,7 +101,7 @@ export default function ProfilePage() {
     <AppPage>
       <AppHeader>
         <IonToolbar>
-          {!accountsListEmpty && (
+          {hasAnyAccounts && (
             <IonButtons slot="secondary">
               <IonButton onClick={() => presentAccountSwitcher()}>
                 {isIosTheme() ? (
@@ -94,7 +116,7 @@ export default function ProfilePage() {
           <DocumentTitle>{title}</DocumentTitle>
           <IonTitle>{title}</IonTitle>
 
-          {loggedIn && (
+          {loggedIn && !showMastodon && (
             <IonButtons slot="end">
               <ProfilePageActions />
             </IonButtons>
