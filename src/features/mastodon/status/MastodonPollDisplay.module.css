@@ -1,0 +1,71 @@
+.container {
+  margin-top: 12px;
+  border: 1px solid var(--ion-color-light-shade);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.option {
+  position: relative;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ion-color-light);
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+
+  &.selected {
+    background: var(--ion-color-primary-tint);
+  }
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--ion-color-primary);
+  opacity: 0.2;
+  transition: width 0.3s ease;
+}
+
+.optionContent {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.optionLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.optionIcon {
+  font-size: 1.2rem;
+  color: var(--ion-color-primary);
+}
+
+.optionTitle {
+  font-size: 0.95rem;
+}
+
+.percentage {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ion-color-medium);
+}
+
+.footer {
+  margin-top: 12px;
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+}
+
+.separator {
+  margin: 0 6px;
+}

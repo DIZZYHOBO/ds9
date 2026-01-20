@@ -3,6 +3,8 @@ import {
   IonButtons,
   IonContent,
   IonIcon,
+  IonItemDivider,
+  IonLabel,
   IonList,
   IonLoading,
   IonRadioGroup,
@@ -11,7 +13,7 @@ import {
   IonToolbar,
 } from "@ionic/react";
 import { add } from "ionicons/icons";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 
 import AppHeader from "#/features/shared/AppHeader";
 import {
@@ -27,6 +29,11 @@ import { useAppDispatch, useAppSelector } from "#/store";
 import Account from "./Account";
 import { loggedInAccountsSelector } from "./authSelectors";
 import { setAccounts } from "./authSlice";
+import MastodonAccount from "./mastodon/MastodonAccount";
+import {
+  mastodonAccountsSelector,
+  switchMastodonAccount,
+} from "./mastodon/mastodonAuthSlice";
 
 type AccountSwitcherProps = {
   onDismiss: (data?: string, role?: string) => void;
@@ -65,16 +72,26 @@ function AccountSwitcherContents({
 
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
-  const accounts = useAppSelector(
+
+  // Lemmy accounts
+  const lemmyAccounts = useAppSelector(
     showGuest
       ? (state) => state.auth.accountData?.accounts
       : loggedInAccountsSelector,
   );
 
+  // Mastodon accounts
+  const mastodonAccounts = useAppSelector(mastodonAccountsSelector);
+
   const appActiveHandle = useAppSelector(
     (state) => state.auth.accountData?.activeHandle,
   );
 
+  const mastodonActiveHandle = useAppSelector(
+    (state) => state.mastodonAuth.accountData?.activeHandle,
+  );
+
+  // Determine which account is currently active (Lemmy or Mastodon)
   const [selectedAccount, setSelectedAccount] = useState(
     _activeHandle ?? appActiveHandle,
   );
@@ -85,15 +102,67 @@ function AccountSwitcherContents({
     setSelectedAccount(_activeHandle ?? appActiveHandle);
   }, [_activeHandle, appActiveHandle]);
 
+  const hasAnyAccounts = useMemo(
+    () => (lemmyAccounts?.length ?? 0) > 0 || mastodonAccounts.length > 0,
+    [lemmyAccounts?.length, mastodonAccounts.length],
+  );
+
   useEffect(() => {
-    if (accounts?.length) return;
+    if (hasAnyAccounts) return;
 
     onDismiss();
-  }, [accounts, onDismiss]);
+  }, [hasAnyAccounts, onDismiss]);
 
-  const accountEls = accounts?.map((account) => (
+  const handleAccountSelect = async (value: string) => {
+    const old = selectedAccount;
+    setSelectedAccount(value);
+
+    // Check if it's a Mastodon account (prefixed with "mastodon:")
+    if (value.startsWith("mastodon:")) {
+      const mastodonHandle = value.replace("mastodon:", "");
+      dispatch(switchMastodonAccount(mastodonHandle));
+      onDismiss();
+      return;
+    }
+
+    // Otherwise, it's a Lemmy account
+    const selectionChangePromise = onSelectAccount?.(value);
+
+    // Bail on rendering the loading indicator
+    if (
+      !selectionChangePromise ||
+      (await isPromiseResolvedByPaint(selectionChangePromise))
+    ) {
+      onDismiss();
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await selectionChangePromise;
+    } catch (error) {
+      setSelectedAccount(old);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+
+    onDismiss();
+  };
+
+  const lemmyAccountEls = lemmyAccounts?.map((account) => (
     <Account
       key={account.handle}
+      account={account}
+      editing={editing}
+      allowEdit={allowEdit}
+    />
+  ));
+
+  const mastodonAccountEls = mastodonAccounts.map((account) => (
+    <MastodonAccount
+      key={`mastodon:${account.account.username}@${account.instance}`}
       account={account}
       editing={editing}
       allowEdit={allowEdit}
@@ -126,54 +195,63 @@ function AccountSwitcherContents({
         {!editing ? (
           <IonRadioGroup
             value={selectedAccount}
-            onIonChange={async (e) => {
-              const old = selectedAccount;
-              setSelectedAccount(e.target.value);
-
-              const selectionChangePromise = onSelectAccount?.(e.target.value);
-
-              // Bail on rendering the loading indicator
-              if (
-                !selectionChangePromise ||
-                (await isPromiseResolvedByPaint(selectionChangePromise))
-              ) {
-                onDismiss();
-                return;
-              }
-
-              setLoading(true);
-
-              try {
-                await selectionChangePromise;
-              } catch (error) {
-                setSelectedAccount(old);
-                throw error;
-              } finally {
-                setLoading(false);
-              }
-
-              onDismiss();
-            }}
+            onIonChange={(e) => handleAccountSelect(e.target.value)}
           >
-            <IonList>{accountEls}</IonList>
+            <IonList>
+              {lemmyAccounts && lemmyAccounts.length > 0 && (
+                <>
+                  {mastodonAccounts.length > 0 && (
+                    <IonItemDivider>
+                      <IonLabel>Lemmy</IonLabel>
+                    </IonItemDivider>
+                  )}
+                  {lemmyAccountEls}
+                </>
+              )}
+              {mastodonAccounts.length > 0 && (
+                <>
+                  <IonItemDivider>
+                    <IonLabel>Mastodon</IonLabel>
+                  </IonItemDivider>
+                  {mastodonAccountEls}
+                </>
+              )}
+            </IonList>
           </IonRadioGroup>
         ) : (
           <IonList>
-            <IonReorderGroup
-              onIonItemReorder={(event) => {
-                if (accounts)
-                  dispatch(
-                    setAccounts(
-                      moveItem(accounts, event.detail.from, event.detail.to),
-                    ),
-                  );
+            {lemmyAccounts && lemmyAccounts.length > 0 && (
+              <>
+                {mastodonAccounts.length > 0 && (
+                  <IonItemDivider>
+                    <IonLabel>Lemmy</IonLabel>
+                  </IonItemDivider>
+                )}
+                <IonReorderGroup
+                  onIonItemReorder={(event) => {
+                    if (lemmyAccounts)
+                      dispatch(
+                        setAccounts(
+                          moveItem(lemmyAccounts, event.detail.from, event.detail.to),
+                        ),
+                      );
 
-                event.detail.complete();
-              }}
-              disabled={false}
-            >
-              {accountEls}
-            </IonReorderGroup>
+                    event.detail.complete();
+                  }}
+                  disabled={false}
+                >
+                  {lemmyAccountEls}
+                </IonReorderGroup>
+              </>
+            )}
+            {mastodonAccounts.length > 0 && (
+              <>
+                <IonItemDivider>
+                  <IonLabel>Mastodon</IonLabel>
+                </IonItemDivider>
+                {mastodonAccountEls}
+              </>
+            )}
           </IonList>
         )}
       </IonContent>

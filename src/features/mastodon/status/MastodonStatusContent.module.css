@@ -1,0 +1,151 @@
+.container {
+  width: 100%;
+  padding: 12px 16px;
+}
+
+.reblogIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  padding-left: 48px;
+
+  ion-icon {
+    font-size: 1rem;
+  }
+}
+
+.mainContent {
+  display: flex;
+  gap: 12px;
+}
+
+.avatar {
+  flex-shrink: 0;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.authorInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.displayName {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.handle {
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timestamp {
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.timeIcon {
+  font-size: 0.9rem;
+}
+
+.spoilerWarning {
+  background: var(--ion-color-warning-tint);
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 8px 0;
+  font-size: 0.9rem;
+}
+
+.statusText {
+  line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  p {
+    margin: 0 0 0.5em 0;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  a {
+    color: var(--ion-color-primary);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .invisible {
+    display: none;
+  }
+
+  .ellipsis::after {
+    content: "...";
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 8px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--ion-color-medium);
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  ion-icon {
+    font-size: 1.2rem;
+  }
+
+  &:hover {
+    background: var(--ion-color-light);
+  }
+
+  &.active {
+    color: var(--ion-color-primary);
+  }
+
+  &.favouriteButton.active {
+    color: var(--ion-color-danger);
+  }
+}

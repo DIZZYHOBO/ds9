@@ -2,6 +2,7 @@ import { IonButton, IonNavLink, IonSpinner } from "@ionic/react";
 import { useRef } from "react";
 
 import PickLoginServer from "#/features/auth/login/login/PickLoginServer";
+import MastodonPickServer from "#/features/auth/mastodon/login/MastodonPickServer";
 import PickJoinServer from "#/features/auth/login/pickJoinServer/PickJoinServer";
 import useStartJoinFlow from "#/features/auth/login/pickJoinServer/useStartJoinFlow";
 import { useAppSelector } from "#/store";
@@ -39,6 +40,12 @@ export default function Buttons() {
           OR
           <hr />
         </div>
+
+        <IonNavLink component={() => <MastodonPickServer />}>
+          <IonButton fill="outline" color="dark" expand="block">
+            Log in with Mastodon
+          </IonButton>
+        </IonNavLink>
 
         <div className={styles.buttonLine}>
           <IonNavLink component={() => <LearnMore />}>
