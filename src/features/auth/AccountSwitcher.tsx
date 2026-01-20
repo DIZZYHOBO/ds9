@@ -126,12 +126,14 @@ function AccountSwitcherContents({
   }, [hasAnyAccounts, onDismiss]);
 
   const handleAccountSelect = async (value: string) => {
+    console.log("[AccountSwitcher] Selected account:", value);
     const old = selectedAccount;
     setSelectedAccount(value);
 
     // Check if it's a Mastodon account (prefixed with "mastodon:")
     if (value.startsWith("mastodon:")) {
       const mastodonHandle = value.replace("mastodon:", "");
+      console.log("[AccountSwitcher] Switching to Mastodon account:", mastodonHandle);
       dispatch(switchMastodonAccount(mastodonHandle));
       onDismiss();
       return;
@@ -172,14 +174,18 @@ function AccountSwitcherContents({
     />
   ));
 
-  const mastodonAccountEls = mastodonAccounts.map((account) => (
-    <MastodonAccount
-      key={`mastodon:${account.account.username}@${account.instance}`}
-      account={account}
-      editing={editing}
-      allowEdit={allowEdit}
-    />
-  ));
+  const mastodonAccountEls = mastodonAccounts.map((account) => {
+    const mastodonValue = `mastodon:${account.account.username}@${account.instance}`;
+    console.log("[AccountSwitcher] Rendering Mastodon account with value:", mastodonValue);
+    return (
+      <MastodonAccount
+        key={mastodonValue}
+        account={account}
+        editing={editing}
+        allowEdit={allowEdit}
+      />
+    );
+  });
 
   return (
     <AppPage>
@@ -207,7 +213,10 @@ function AccountSwitcherContents({
         {!editing ? (
           <IonRadioGroup
             value={selectedAccount}
-            onIonChange={(e) => handleAccountSelect(e.target.value)}
+            onIonChange={(e) => {
+              console.log("[AccountSwitcher] IonRadioGroup onChange:", e.target.value);
+              handleAccountSelect(e.target.value);
+            }}
           >
             <IonList>
               {lemmyAccounts && lemmyAccounts.length > 0 && (
