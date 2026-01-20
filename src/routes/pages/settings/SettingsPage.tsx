@@ -6,7 +6,6 @@ import {
   IonList,
   IonTitle,
   IonToolbar,
-  useIonModal,
 } from "@ionic/react";
 import { useDocumentVisibility } from "@mantine/hooks";
 import {
@@ -16,7 +15,6 @@ import {
   ban,
   cog,
   colorPalette,
-  heart,
   pricetag,
   reloadCircle,
 } from "ionicons/icons";
@@ -35,7 +33,6 @@ import BiometricTitle from "#/features/settings/biometric/BiometricTitle";
 import DatabaseErrorItem from "#/features/settings/root/DatabaseErrorItem";
 import AppContent from "#/features/shared/AppContent";
 import AppHeader from "#/features/shared/AppHeader";
-import TipDialog from "#/features/tips/TipDialog";
 import { AppPage } from "#/helpers/AppPage";
 import { sv } from "#/helpers/css";
 import { isAppleDeviceInstalledToHomescreen, isNative } from "#/helpers/device";
@@ -73,10 +70,6 @@ export default function SettingsPage() {
   const dispatch = useAppDispatch();
   const documentState = useDocumentVisibility();
 
-  const [presentTip, onDismissTip] = useIonModal(TipDialog, {
-    onDismiss: (data?: string, role?: string) => onDismissTip(data, role),
-  });
-
   useEffect(() => {
     checkForUpdates();
   }, [checkForUpdates]);
@@ -103,19 +96,6 @@ export default function SettingsPage() {
         </AppHeader>
 
         {databaseError && <DatabaseErrorItem />}
-
-        <IonList inset>
-          <IonItem
-            onClick={() => presentTip({ cssClass: "transparent-scroll" })}
-            button
-            detail
-          >
-            <IconBg color="color(display-p3 1 0 0)" slot="start">
-              <IonIcon icon={heart} />
-            </IconBg>
-            <IonLabel className="ion-text-nowrap">Support Voyager</IonLabel>
-          </IonItem>
-        </IonList>
 
         {!isNative() && (
           <IonList inset>
