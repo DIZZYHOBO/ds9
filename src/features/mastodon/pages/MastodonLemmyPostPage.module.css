@@ -1,0 +1,33 @@
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+  color: var(--ion-color-danger);
+}
+
+.retryButton {
+  padding: 0.5rem 1rem;
+  background: var(--ion-color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.commentsHeader {
+  padding: 16px;
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 1px solid var(--ion-border-color, rgba(0, 0, 0, 0.1));
+  background: var(--ion-background-color);
+}
+
+.noComments {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--ion-color-medium);
+}
