@@ -87,7 +87,13 @@ function saveAppCredentialsToStorage(credentials: MastodonAppCredentials) {
 
 function getMastodonModeFromStorage(): boolean {
   const stored = localStorage.getItem(MASTODON_MODE_STORAGE_KEY);
-  return stored === "true";
+  if (stored !== null) {
+    return stored === "true";
+  }
+  // If no mode is stored, check if there's an active Mastodon account
+  // This handles users who logged in before mode persistence was added
+  const accountData = getAccountsFromStorage();
+  return !!(accountData?.activeHandle);
 }
 
 function saveMastodonModeToStorage(mode: boolean) {
