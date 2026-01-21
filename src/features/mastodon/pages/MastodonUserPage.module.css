@@ -1,8 +1,3 @@
-.container {
-  height: 100%;
-  overflow-y: auto;
-}
-
 .notLoggedIn {
   display: flex;
   flex-direction: column;

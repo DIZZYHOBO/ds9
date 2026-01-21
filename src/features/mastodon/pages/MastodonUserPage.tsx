@@ -1,16 +1,25 @@
 import {
+  IonButtons,
   IonRefresher,
   IonRefresherContent,
+  IonTitle,
+  IonToolbar,
   RefresherCustomEvent,
 } from "@ionic/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router";
 import { VListHandle } from "virtua";
 
 import { useRangeChange } from "#/features/feed/useRangeChange";
+import AppHeader from "#/features/shared/AppHeader";
 import { CenteredSpinner } from "#/features/shared/CenteredSpinner";
+import { AppPage } from "#/helpers/AppPage";
 import { formatRelative } from "#/helpers/date";
 import { AppVList } from "#/helpers/virtua";
+import FeedContent from "#/routes/pages/shared/FeedContent";
+import { AppBackButton } from "#/routes/twoColumn/AppBackButton";
 import {
+  MastodonAccount,
   MastodonClient,
   MastodonStatus,
   PaginatedResponse,
@@ -21,11 +30,18 @@ import { activeMastodonAccountSelector } from "../../auth/mastodon/mastodonAuthS
 import MastodonStatusItem from "../status/MastodonStatusItem";
 import { setStatuses } from "../status/mastodonStatusSlice";
 
-import styles from "./MastodonProfilePage.module.css";
+import styles from "./MastodonUserPage.module.css";
 
-export default function MastodonProfilePage() {
+interface MastodonUserPageParams {
+  id: string;
+}
+
+export default function MastodonUserPage() {
+  const { id } = useParams<MastodonUserPageParams>();
   const dispatch = useAppDispatch();
   const activeAccount = useAppSelector(activeMastodonAccountSelector);
+
+  const [user, setUser] = useState<MastodonAccount | null>(null);
   const [statuses, setLocalStatuses] = useState<MastodonStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -40,18 +56,23 @@ export default function MastodonProfilePage() {
     return new MastodonClient(activeAccount.instance, activeAccount.accessToken);
   }, [activeAccount]);
 
+  const fetchUser = useCallback(async () => {
+    if (!client) return null;
+    return client.getAccount(id);
+  }, [client, id]);
+
   const fetchStatuses = useCallback(
     async (maxId?: string): Promise<PaginatedResponse<MastodonStatus> | null> => {
-      if (!client || !activeAccount) return null;
+      if (!client) return null;
 
-      // Fetch the user's own statuses including replies (comments)
-      return client.getAccountStatuses(activeAccount.account.id, {
+      // Fetch the user's statuses including replies
+      return client.getAccountStatuses(id, {
         max_id: maxId,
         limit: 20,
-        exclude_replies: false, // Include replies/comments in the feed
+        exclude_replies: false,
       });
     },
-    [client, activeAccount],
+    [client, id],
   );
 
   const loadInitial = useCallback(async () => {
@@ -60,19 +81,27 @@ export default function MastodonProfilePage() {
     nextMaxIdRef.current = undefined;
 
     try {
-      const response = await fetchStatuses();
-      if (response) {
-        setLocalStatuses(response.data);
-        dispatch(setStatuses(response.data));
-        nextMaxIdRef.current = response.next;
-        setHasMore(!!response.next);
+      const [userResponse, statusesResponse] = await Promise.all([
+        fetchUser(),
+        fetchStatuses(),
+      ]);
+
+      if (userResponse) {
+        setUser(userResponse);
+      }
+
+      if (statusesResponse) {
+        setLocalStatuses(statusesResponse.data);
+        dispatch(setStatuses(statusesResponse.data));
+        nextMaxIdRef.current = statusesResponse.next;
+        setHasMore(!!statusesResponse.next);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load statuses");
+      setError(e instanceof Error ? e.message : "Failed to load user");
     } finally {
       setLoading(false);
     }
-  }, [fetchStatuses, dispatch]);
+  }, [fetchUser, fetchStatuses, dispatch]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || !nextMaxIdRef.current) return;
@@ -111,64 +140,72 @@ export default function MastodonProfilePage() {
 
   if (!activeAccount) {
     return (
-      <div className={styles.notLoggedIn}>
-        <p>Not logged in to Mastodon</p>
-      </div>
+      <AppPage>
+        <AppHeader>
+          <IonToolbar>
+            <IonButtons slot="start">
+              <AppBackButton defaultHref="/posts" />
+            </IonButtons>
+            <IonTitle>User</IonTitle>
+          </IonToolbar>
+        </AppHeader>
+        <FeedContent>
+          <div className={styles.notLoggedIn}>
+            <p>Not logged in to Mastodon</p>
+          </div>
+        </FeedContent>
+      </AppPage>
     );
   }
 
-  const account = activeAccount.account;
-
   // Profile header component to render at top of list
-  const profileHeader = (
+  const profileHeader = user ? (
     <div className={styles.header}>
-      {account.header && (
+      {user.header && (
         <div
           className={styles.banner}
-          style={{ backgroundImage: `url(${account.header})` }}
+          style={{ backgroundImage: `url(${user.header})` }}
         />
       )}
       <div className={styles.profileInfo}>
         <img
-          src={account.avatar}
-          alt={account.display_name || account.username}
+          src={user.avatar}
+          alt={user.display_name || user.username}
           className={styles.avatar}
         />
         <div className={styles.names}>
           <h1 className={styles.displayName}>
-            {account.display_name || account.username}
+            {user.display_name || user.username}
           </h1>
-          <p className={styles.handle}>
-            @{account.username}@{activeAccount.instance}
-          </p>
+          <p className={styles.handle}>@{user.acct}</p>
         </div>
       </div>
 
-      {account.note && (
+      {user.note && (
         <div
           className={styles.bio}
-          dangerouslySetInnerHTML={{ __html: account.note }}
+          dangerouslySetInnerHTML={{ __html: user.note }}
         />
       )}
 
       <div className={styles.stats}>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{account.statuses_count}</span>
+          <span className={styles.statValue}>{user.statuses_count}</span>
           <span className={styles.statLabel}>Posts</span>
         </div>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{account.following_count}</span>
+          <span className={styles.statValue}>{user.following_count}</span>
           <span className={styles.statLabel}>Following</span>
         </div>
         <div className={styles.stat}>
-          <span className={styles.statValue}>{account.followers_count}</span>
+          <span className={styles.statValue}>{user.followers_count}</span>
           <span className={styles.statLabel}>Followers</span>
         </div>
       </div>
 
-      {account.fields && account.fields.length > 0 && (
+      {user.fields && user.fields.length > 0 && (
         <div className={styles.fields}>
-          {account.fields.map((field, index) => (
+          {user.fields.map((field, index) => (
             <div key={index} className={styles.field}>
               <span className={styles.fieldName}>{field.name}</span>
               <span
@@ -181,62 +218,69 @@ export default function MastodonProfilePage() {
       )}
 
       <p className={styles.joinDate}>
-        Joined {formatRelative(account.created_at)}
+        Joined {formatRelative(user.created_at)}
       </p>
 
       <div className={styles.postsSectionTitle}>Posts & Replies</div>
     </div>
-  );
+  ) : null;
 
   return (
-    <div className={styles.container}>
-      <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
-        <IonRefresherContent />
-      </IonRefresher>
+    <AppPage>
+      <AppHeader>
+        <IonToolbar>
+          <IonButtons slot="start">
+            <AppBackButton defaultHref="/posts" />
+          </IonButtons>
+          <IonTitle>
+            {user ? user.display_name || user.username : "User"}
+          </IonTitle>
+        </IonToolbar>
+      </AppHeader>
 
-      {loading ? (
-        <>
-          {profileHeader}
+      <FeedContent>
+        <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
+          <IonRefresherContent />
+        </IonRefresher>
+
+        {loading ? (
           <CenteredSpinner />
-        </>
-      ) : error ? (
-        <>
-          {profileHeader}
+        ) : error ? (
           <div className={styles.error}>
             <p>{error}</p>
             <button onClick={loadInitial} className={styles.retryButton}>
               Retry
             </button>
           </div>
-        </>
-      ) : (
-        <AppVList
-          ref={virtuaHandle}
-          className="ion-content-scroll-host"
-          onScroll={onScroll}
-        >
-          {profileHeader}
-          {statuses.length === 0 ? (
-            <div className={styles.empty}>
-              <p>No posts yet</p>
-            </div>
-          ) : (
-            <>
-              {statuses.map((status) => (
-                <MastodonStatusItem key={status.id} status={status} />
-              ))}
-              {loadingMore && (
-                <div className={styles.loadingMore}>
-                  <CenteredSpinner />
-                </div>
-              )}
-              {!hasMore && statuses.length > 0 && (
-                <div className={styles.endOfFeed}>No more posts</div>
-              )}
-            </>
-          )}
-        </AppVList>
-      )}
-    </div>
+        ) : (
+          <AppVList
+            ref={virtuaHandle}
+            className="ion-content-scroll-host"
+            onScroll={onScroll}
+          >
+            {profileHeader}
+            {statuses.length === 0 ? (
+              <div className={styles.empty}>
+                <p>No posts yet</p>
+              </div>
+            ) : (
+              <>
+                {statuses.map((status) => (
+                  <MastodonStatusItem key={status.id} status={status} />
+                ))}
+                {loadingMore && (
+                  <div className={styles.loadingMore}>
+                    <CenteredSpinner />
+                  </div>
+                )}
+                {!hasMore && statuses.length > 0 && (
+                  <div className={styles.endOfFeed}>No more posts</div>
+                )}
+              </>
+            )}
+          </AppVList>
+        )}
+      </FeedContent>
+    </AppPage>
   );
 }

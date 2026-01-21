@@ -1,3 +1,6 @@
+import { Link } from "react-router-dom";
+
+import { useBuildGeneralBrowseLink } from "#/helpers/routes";
 import { MastodonAccount } from "#/services/mastodon";
 
 import styles from "./MastodonDisplayName.module.css";
@@ -5,18 +8,21 @@ import styles from "./MastodonDisplayName.module.css";
 interface MastodonDisplayNameProps {
   account: MastodonAccount;
   className?: string;
+  linkToProfile?: boolean;
 }
 
 export default function MastodonDisplayName({
   account,
   className,
+  linkToProfile = false,
 }: MastodonDisplayNameProps) {
+  const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
   const displayName = account.display_name || account.username;
 
   // Check if display name contains custom emojis
   const hasEmojis = account.emojis.length > 0;
 
-  if (hasEmojis) {
+  const nameContent = hasEmojis ? (() => {
     let processedName = displayName;
     for (const emoji of account.emojis) {
       const emojiRegex = new RegExp(`:${emoji.shortcode}:`, "g");
@@ -32,11 +38,23 @@ export default function MastodonDisplayName({
         dangerouslySetInnerHTML={{ __html: processedName }}
       />
     );
-  }
-
-  return (
+  })() : (
     <span className={`${styles.displayName} ${className ?? ""}`}>
       {displayName}
     </span>
   );
+
+  if (linkToProfile) {
+    return (
+      <Link
+        to={buildGeneralBrowseLink(`/mastodon/user/${account.id}`)}
+        className={styles.link}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {nameContent}
+      </Link>
+    );
+  }
+
+  return nameContent;
 }

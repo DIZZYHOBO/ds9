@@ -8,3 +8,12 @@
   vertical-align: middle;
   margin: 0 0.1em;
 }
+
+.link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.link:hover .displayName {
+  text-decoration: underline;
+}

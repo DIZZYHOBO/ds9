@@ -75,13 +75,17 @@ export default function MastodonStatusContent({
         <div className={styles.reblogIndicator}>
           <IonIcon icon={repeatOutline} />
           <span>
-            <MastodonDisplayName account={reblogger} /> boosted
+            <MastodonDisplayName account={reblogger} linkToProfile /> boosted
           </span>
         </div>
       )}
 
       <div className={styles.mainContent}>
-        <MastodonAvatar account={status.account} className={styles.avatar} />
+        <MastodonAvatar
+          account={status.account}
+          className={styles.avatar}
+          linkToProfile
+        />
 
         <div className={styles.content}>
           <div className={styles.header}>
@@ -89,6 +93,7 @@ export default function MastodonStatusContent({
               <MastodonDisplayName
                 account={status.account}
                 className={styles.displayName}
+                linkToProfile
               />
               <span className={styles.handle}>@{status.account.acct}</span>
             </div>

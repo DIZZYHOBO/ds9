@@ -1,5 +1,7 @@
 import { IonAvatar } from "@ionic/react";
+import { Link } from "react-router-dom";
 
+import { useBuildGeneralBrowseLink } from "#/helpers/routes";
 import { MastodonAccount } from "#/services/mastodon";
 
 import styles from "./MastodonAvatar.module.css";
@@ -8,16 +10,19 @@ interface MastodonAvatarProps {
   account: MastodonAccount;
   size?: "small" | "medium" | "large";
   className?: string;
+  linkToProfile?: boolean;
 }
 
 export default function MastodonAvatar({
   account,
   size = "medium",
   className,
+  linkToProfile = false,
 }: MastodonAvatarProps) {
+  const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
   const sizeClass = styles[size];
 
-  return (
+  const avatar = (
     <IonAvatar className={`${styles.avatar} ${sizeClass} ${className ?? ""}`}>
       <img
         src={account.avatar}
@@ -32,4 +37,18 @@ export default function MastodonAvatar({
       />
     </IonAvatar>
   );
+
+  if (linkToProfile) {
+    return (
+      <Link
+        to={buildGeneralBrowseLink(`/mastodon/user/${account.id}`)}
+        className={styles.link}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {avatar}
+      </Link>
+    );
+  }
+
+  return avatar;
 }
