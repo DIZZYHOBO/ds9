@@ -23,12 +23,13 @@ import {
   mastodonLoggedInSelector,
 } from "../../auth/mastodon/mastodonAuthSlice";
 import MastodonComposeModal from "../compose/MastodonComposeModal";
+import LemmyFederatedFeed from "../feed/LemmyFederatedFeed";
 import MastodonFeed, { MastodonFeedType } from "../feed/MastodonFeed";
 import MastodonAvatar from "../shared/MastodonAvatar";
 
 import styles from "./MastodonHomePage.module.css";
 
-type TimelineType = "home" | "local" | "federated";
+type TimelineType = "home" | "local" | "federated" | "lemmy";
 
 export default function MastodonHomePage() {
   const isLoggedIn = useAppSelector(mastodonLoggedInSelector);
@@ -107,21 +108,28 @@ export default function MastodonHomePage() {
             <IonSegmentButton value="home">Home</IonSegmentButton>
             <IonSegmentButton value="local">Local</IonSegmentButton>
             <IonSegmentButton value="federated">Federated</IonSegmentButton>
+            <IonSegmentButton value="lemmy">Lemmy</IonSegmentButton>
           </IonSegment>
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <MastodonFeed
-          key={timeline}
-          feedType={getFeedType()}
-          onReply={handleReply}
-          onEdit={handleEdit}
-        />
-        <IonFab slot="fixed" vertical="bottom" horizontal="end">
-          <IonFabButton onClick={() => setComposeOpen(true)}>
-            <IonIcon icon={createOutline} />
-          </IonFabButton>
-        </IonFab>
+        {timeline === "lemmy" ? (
+          <LemmyFederatedFeed />
+        ) : (
+          <MastodonFeed
+            key={timeline}
+            feedType={getFeedType()}
+            onReply={handleReply}
+            onEdit={handleEdit}
+          />
+        )}
+        {timeline !== "lemmy" && (
+          <IonFab slot="fixed" vertical="bottom" horizontal="end">
+            <IonFabButton onClick={() => setComposeOpen(true)}>
+              <IonIcon icon={createOutline} />
+            </IonFabButton>
+          </IonFab>
+        )}
       </IonContent>
 
       <MastodonComposeModal

@@ -149,7 +149,7 @@ export default function MastodonComposeModal({
         setUploadedMedia(
           editStatus.media_attachments.map((m) => ({
             id: m.id,
-            previewUrl: m.preview_url,
+            previewUrl: m.preview_url || "",
           })),
         );
       }
@@ -212,7 +212,7 @@ export default function MastodonComposeModal({
         setUploadedMedia((prev) =>
           prev.map((m) =>
             m.id === placeholderId
-              ? { id: media.id, previewUrl: media.preview_url }
+              ? { id: media.id, previewUrl: media.preview_url || "" }
               : m,
           ),
         );
