@@ -5,12 +5,11 @@ import {
   chatbubbleOutline,
   ellipsisHorizontal,
   repeatOutline,
-  timeOutline,
 } from "ionicons/icons";
 import { Link } from "react-router-dom";
 
+import Ago from "#/features/labels/Ago";
 import { cx } from "#/helpers/css";
-import { formatRelative } from "#/helpers/date";
 import { useBuildMastodonLink } from "#/helpers/routes";
 import { MastodonAccount, MastodonStatus } from "#/services/mastodon";
 import { useAppDispatch, useAppSelector } from "#/store";
@@ -39,7 +38,6 @@ export default function MastodonStatusContent({
   isReblog,
   reblogger,
   showActions = true,
-  onReply,
   onMoreActions,
 }: MastodonStatusContentProps) {
   const dispatch = useAppDispatch();
@@ -68,66 +66,61 @@ export default function MastodonStatusContent({
         </div>
       )}
 
-      <div className={styles.mainContent}>
-        {/* Left: Avatar */}
-        <Link
-          to={buildMastodonLink(`/mastodon/user/${status.account.id}`)}
-          className={styles.avatarLink}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <img
-            src={status.account.avatar}
-            alt=""
-            className={styles.avatar}
-          />
-        </Link>
-
-        {/* Center: Content */}
-        <div className={styles.content}>
-          {/* Author info line */}
-          <div className={styles.authorLine}>
-            <Link
-              to={buildMastodonLink(`/mastodon/user/${status.account.id}`)}
-              className={styles.authorName}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {status.account.display_name || status.account.username}
-            </Link>
-            <span className={styles.authorHandle}>@{status.account.acct}</span>
-          </div>
-
-          {/* Spoiler warning */}
-          {status.spoiler_text && (
-            <div className={styles.spoilerWarning}>
-              <IonText color="warning">
-                <strong>CW:</strong> {status.spoiler_text}
-              </IonText>
-            </div>
-          )}
-
-          {/* Status text */}
-          <div
-            className={styles.statusText}
-            dangerouslySetInnerHTML={{ __html: status.content }}
-          />
-
-          {/* Media */}
-          {status.media_attachments.length > 0 && (
-            <MastodonMediaAttachments
-              attachments={status.media_attachments}
-              sensitive={status.sensitive}
+      {/* Header - Author info at top */}
+      <div className={styles.header}>
+        <div className={styles.authorInfo}>
+          <Link
+            to={buildMastodonLink(`/mastodon/user/${status.account.id}`)}
+            className={styles.authorLink}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={status.account.avatar}
+              alt=""
+              className={styles.authorAvatar}
             />
-          )}
+            <span className={styles.authorName}>
+              {status.account.display_name || status.account.username}
+            </span>
+            <span className={styles.authorHandle}>@{status.account.acct}</span>
+          </Link>
+        </div>
+      </div>
 
-          {/* Poll */}
-          {status.poll && <MastodonPollDisplay poll={status.poll} />}
+      {/* Spoiler warning */}
+      {status.spoiler_text && (
+        <div className={styles.spoilerWarning}>
+          <IonText color="warning">
+            <strong>CW:</strong> {status.spoiler_text}
+          </IonText>
+        </div>
+      )}
 
-          {/* Link card */}
-          {status.card && !status.media_attachments.length && (
-            <MastodonStatusCard card={status.card} />
-          )}
+      {/* Content */}
+      <div
+        className={styles.statusText}
+        dangerouslySetInnerHTML={{ __html: status.content }}
+      />
 
-          {/* Bottom stats */}
+      {/* Media */}
+      {status.media_attachments.length > 0 && (
+        <MastodonMediaAttachments
+          attachments={status.media_attachments}
+          sensitive={status.sensitive}
+        />
+      )}
+
+      {/* Poll */}
+      {status.poll && <MastodonPollDisplay poll={status.poll} />}
+
+      {/* Link card */}
+      {status.card && !status.media_attachments.length && (
+        <MastodonStatusCard card={status.card} />
+      )}
+
+      {/* Details row - stats on left, actions on right */}
+      <div className={styles.details}>
+        <div className={styles.leftDetails}>
           <div className={styles.stats}>
             <span className={styles.stat}>
               <IonIcon icon={arrowUpOutline} />
@@ -138,15 +131,13 @@ export default function MastodonStatusContent({
               {status.replies_count}
             </span>
             <span className={styles.stat}>
-              <IonIcon icon={timeOutline} />
-              {formatRelative(status.created_at)}
+              <Ago date={status.created_at} />
             </span>
           </div>
         </div>
 
-        {/* Right: Action buttons */}
         {showActions && (
-          <div className={styles.rightActions}>
+          <div className={styles.rightDetails}>
             <button
               className={styles.actionBtn}
               onClick={(e) => {
@@ -157,7 +148,7 @@ export default function MastodonStatusContent({
               <IonIcon icon={ellipsisHorizontal} />
             </button>
             <button
-              className={cx(styles.actionBtn, styles.upvote, favourited && styles.active)}
+              className={cx(styles.actionBtn, favourited && styles.active)}
               onClick={handleFavourite}
             >
               <IonIcon icon={arrowUpOutline} />
