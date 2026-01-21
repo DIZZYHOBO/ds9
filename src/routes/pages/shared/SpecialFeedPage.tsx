@@ -1,6 +1,7 @@
 import { IonBackButton, IonButtons, IonToolbar } from "@ionic/react";
 import { ListingType } from "threadiverse";
 
+import { activeMastodonAccountSelector } from "#/features/auth/mastodon/mastodonAuthSlice";
 import { followIdsSelector } from "#/features/auth/siteSlice";
 import ModActions from "#/features/community/mod/ModActions";
 import TitleSearch from "#/features/community/titleSearch/TitleSearch";
@@ -23,6 +24,7 @@ import SpecialFeedMoreActions from "#/features/feed/SpecialFeedMoreActions";
 import useCommonPostFeedParams from "#/features/feed/useCommonPostFeedParams";
 import useFeedUpdate from "#/features/feed/useFeedUpdate";
 import { ShowSubscribedIconContext } from "#/features/labels/links/CommunityLink";
+import MastodonHomePage from "#/features/mastodon/pages/MastodonHomePage";
 import PostAppearanceProvider, {
   WaitUntilPostAppearanceResolved,
 } from "#/features/post/appearance/PostAppearanceProvider";
@@ -44,6 +46,17 @@ interface SpecialFeedProps {
 }
 
 export default function SpecialFeedPage({ type }: SpecialFeedProps) {
+  const activeMastodonAccount = useAppSelector(activeMastodonAccountSelector);
+
+  // Show Mastodon home feed when Mastodon account is active
+  if (activeMastodonAccount) {
+    return <MastodonHomePage />;
+  }
+
+  return <LemmySpecialFeedPage type={type} />;
+}
+
+function LemmySpecialFeedPage({ type }: SpecialFeedProps) {
   const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
 
   const client = useClient();

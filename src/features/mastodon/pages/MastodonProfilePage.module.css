@@ -122,16 +122,13 @@
   margin: 0;
 }
 
-.postsSection {
-  border-top: 8px solid var(--ion-color-light);
-}
-
 .postsSectionTitle {
   padding: 16px;
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  border-bottom: 1px solid var(--ion-color-light);
+  background: var(--ion-color-light);
+  border-top: 8px solid var(--ion-color-light);
 }
 
 .error {
