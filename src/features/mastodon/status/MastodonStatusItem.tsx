@@ -19,6 +19,8 @@ export interface MastodonStatusItemProps {
   className?: string;
   onClick?: (status: MastodonStatus) => void;
   disableNavigation?: boolean;
+  onReply?: (status: MastodonStatus) => void;
+  onEdit?: (status: MastodonStatus) => void;
 }
 
 function MastodonStatusItem({
@@ -26,9 +28,11 @@ function MastodonStatusItem({
   className,
   onClick,
   disableNavigation,
+  onReply,
+  onEdit,
 }: MastodonStatusItemProps) {
   const router = useOptimizedIonRouter();
-  const openStatusActions = useMastodonStatusActions(status);
+  const openStatusActions = useMastodonStatusActions(status, { onReply, onEdit });
 
   // If this is a reblog, show the original status with reblog indicator
   const displayStatus = status.reblog ?? status;
@@ -74,6 +78,7 @@ function MastodonStatusItem({
         status={displayStatus}
         isReblog={isReblog}
         reblogger={isReblog ? status.account : undefined}
+        onReply={onReply}
       />
     </IonItem>
   );

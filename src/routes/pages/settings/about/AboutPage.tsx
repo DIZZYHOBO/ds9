@@ -76,7 +76,7 @@ export default function AboutPage() {
         <IconBg color="color(display-p3 1 0 0)" slot="start">
           <IonIcon icon={heart} />
         </IconBg>
-        <IonLabel>Rate Voyager</IonLabel>
+        <IonLabel>Rate Tuvix</IonLabel>
       </IonItemInAppExternalLink>
     );
   })();
@@ -115,7 +115,7 @@ export default function AboutPage() {
             <IconBg color="color(display-p3 0 0.8 0.3)" slot="start">
               <IonIcon icon={people} />
             </IconBg>
-            <IonLabel>VoyagerApp Community</IonLabel>
+            <IonLabel>Tuvix Community</IonLabel>
           </IonItemInAppExternalLink>
           <IonItemInAppExternalLink
             detail
@@ -196,7 +196,7 @@ export default function AboutPage() {
             <IconBg color="color(display-p3 0.7 0 1)" size="1" slot="start">
               <IonIcon icon={getShareIcon(true)} />
             </IconBg>
-            <IonLabel>Share Voyager</IonLabel>
+            <IonLabel>Share Tuvix</IonLabel>
           </IonItemInAppExternalLink>
         </IonList>
       </AppContent>

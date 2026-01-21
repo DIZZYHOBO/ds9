@@ -28,7 +28,7 @@ import { useAppDispatch, useAppSelector } from "#/store";
 import {
   activeMastodonAccountSelector,
 } from "../../auth/mastodon/mastodonAuthSlice";
-import { createMastodonStatus } from "../status/mastodonStatusSlice";
+import { createMastodonStatus, editMastodonStatus } from "../status/mastodonStatusSlice";
 import MastodonAvatar from "../shared/MastodonAvatar";
 
 import styles from "./MastodonComposeModal.module.css";
@@ -39,6 +39,7 @@ interface MastodonComposeModalProps {
   isOpen: boolean;
   onDismiss: () => void;
   replyTo?: MastodonStatus;
+  editStatus?: MastodonStatus;
   onSuccess?: (status: MastodonStatus) => void;
 }
 
@@ -80,6 +81,7 @@ export default function MastodonComposeModal({
   isOpen,
   onDismiss,
   replyTo,
+  editStatus,
   onSuccess,
 }: MastodonComposeModalProps) {
   const dispatch = useAppDispatch();
@@ -112,6 +114,22 @@ export default function MastodonComposeModal({
     }
   }, [isOpen, replyTo]);
 
+  // Set initial content for editing
+  useEffect(() => {
+    if (isOpen && editStatus) {
+      // Strip HTML to get plain text
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = editStatus.content;
+      const textContent = tempDiv.textContent || tempDiv.innerText || "";
+      setContent(textContent);
+      setVisibility(editStatus.visibility);
+      if (editStatus.spoiler_text) {
+        setSpoilerText(editStatus.spoiler_text);
+        setShowSpoilerInput(true);
+      }
+    }
+  }, [isOpen, editStatus]);
+
   // Focus textarea when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -138,19 +156,35 @@ export default function MastodonComposeModal({
     setPosting(true);
 
     try {
-      const status = await dispatch(
-        createMastodonStatus({
-          status: content,
-          visibility,
-          spoiler_text: showSpoilerInput ? spoilerText : undefined,
-          in_reply_to_id: replyTo?.id,
-        }),
-      );
+      let status: MastodonStatus;
 
-      presentToast({
-        message: replyTo ? "Reply posted!" : "Post published!",
-        color: "success",
-      });
+      if (editStatus) {
+        // Editing existing status
+        status = await dispatch(
+          editMastodonStatus(editStatus.id, {
+            status: content,
+            spoiler_text: showSpoilerInput ? spoilerText : undefined,
+          }),
+        );
+        presentToast({
+          message: "Post updated!",
+          color: "success",
+        });
+      } else {
+        // Creating new status
+        status = await dispatch(
+          createMastodonStatus({
+            status: content,
+            visibility,
+            spoiler_text: showSpoilerInput ? spoilerText : undefined,
+            in_reply_to_id: replyTo?.id,
+          }),
+        );
+        presentToast({
+          message: replyTo ? "Reply posted!" : "Post published!",
+          color: "success",
+        });
+      }
 
       onSuccess?.(status);
       onDismiss();
@@ -177,7 +211,7 @@ export default function MastodonComposeModal({
               <IonIcon icon={closeOutline} slot="icon-only" />
             </IonButton>
           </IonButtons>
-          <IonTitle>{replyTo ? "Reply" : "New Post"}</IonTitle>
+          <IonTitle>{editStatus ? "Edit Post" : replyTo ? "Reply" : "New Post"}</IonTitle>
           <IonButtons slot="end">
             <IonButton
               strong
