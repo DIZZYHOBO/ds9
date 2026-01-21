@@ -38,7 +38,7 @@ interface MastodonUserPageParams {
   id: string;
 }
 
-type FeedTab = "posts" | "replies";
+type FeedTab = "overview" | "posts" | "comments";
 
 export default function MastodonUserPage() {
   const { id } = useParams<MastodonUserPageParams>();
@@ -46,7 +46,7 @@ export default function MastodonUserPage() {
   const activeAccount = useAppSelector(activeMastodonAccountSelector);
 
   const [user, setUser] = useState<MastodonAccount | null>(null);
-  const [activeTab, setActiveTab] = useState<FeedTab>("posts");
+  const [activeTab, setActiveTab] = useState<FeedTab>("overview");
   const [statuses, setLocalStatuses] = useState<MastodonStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -70,12 +70,12 @@ export default function MastodonUserPage() {
     async (maxId?: string): Promise<PaginatedResponse<MastodonStatus> | null> => {
       if (!client) return null;
 
-      // Posts tab: exclude replies, Replies tab: only replies
+      // Overview: all posts, Posts: exclude replies, Comments: only replies
       return client.getAccountStatuses(id, {
         max_id: maxId,
         limit: 20,
         exclude_replies: activeTab === "posts",
-        exclude_reblogs: activeTab === "replies",
+        exclude_reblogs: false,
       });
     },
     [client, id, activeTab],
@@ -97,7 +97,7 @@ export default function MastodonUserPage() {
       }
 
       if (statusesResponse) {
-        const filteredData = activeTab === "replies"
+        const filteredData = activeTab === "comments"
           ? statusesResponse.data.filter(s => s.in_reply_to_id)
           : statusesResponse.data;
         setLocalStatuses(filteredData);
@@ -120,7 +120,7 @@ export default function MastodonUserPage() {
     try {
       const response = await fetchStatuses(nextMaxIdRef.current);
       if (response) {
-        const filteredData = activeTab === "replies"
+        const filteredData = activeTab === "comments"
           ? response.data.filter(s => s.in_reply_to_id)
           : response.data;
         setLocalStatuses((prev) => [...prev, ...filteredData]);
@@ -244,8 +244,9 @@ export default function MastodonUserPage() {
           value={activeTab}
           onIonChange={(e) => handleTabChange(e.detail.value as FeedTab)}
         >
+          <IonSegmentButton value="overview">Overview</IonSegmentButton>
           <IonSegmentButton value="posts">Posts</IonSegmentButton>
-          <IonSegmentButton value="replies">Replies</IonSegmentButton>
+          <IonSegmentButton value="comments">Comments</IonSegmentButton>
         </IonSegment>
       </div>
     </div>
@@ -287,7 +288,7 @@ export default function MastodonUserPage() {
             {profileHeader}
             {statuses.length === 0 ? (
               <div className={styles.empty}>
-                <p>No {activeTab === "posts" ? "posts" : "replies"} yet</p>
+                <p>No {activeTab === "overview" ? "activity" : activeTab} yet</p>
               </div>
             ) : (
               <>

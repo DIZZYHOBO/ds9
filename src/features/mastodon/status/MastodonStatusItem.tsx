@@ -79,6 +79,7 @@ function MastodonStatusItem({
         isReblog={isReblog}
         reblogger={isReblog ? status.account : undefined}
         onReply={onReply}
+        onMoreActions={openStatusActions}
       />
     </IonItem>
   );
