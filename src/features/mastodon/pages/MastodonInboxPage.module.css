@@ -1,0 +1,113 @@
+.container {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.notLoggedIn,
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--ion-color-medium);
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+  color: var(--ion-color-danger);
+}
+
+.retryButton {
+  padding: 0.5rem 1rem;
+  background: var(--ion-color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.notificationItem {
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-end: 0;
+}
+
+.notificationContent {
+  width: 100%;
+  padding: 8px 0;
+}
+
+.notificationHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notificationIcon {
+  font-size: 1.2rem;
+  color: var(--ion-color-primary);
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.notificationInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationText {
+  font-size: 0.9rem;
+  line-height: 1.3;
+  display: block;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: var(--ion-color-medium);
+}
+
+.statusPreview {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--ion-color-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.statusPreview p {
+  margin: 0;
+}
+
+.statusPreview a {
+  color: var(--ion-color-primary);
+}
+
+.loadingMore {
+  padding: 1rem;
+}
+
+.endOfFeed {
+  text-align: center;
+  padding: 2rem;
+  color: var(--ion-color-medium);
+  font-size: 0.9rem;
+}

@@ -1,11 +1,12 @@
 import { IonItem } from "@ionic/react";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { useLongPress } from "use-long-press";
 
 import { cx } from "#/helpers/css";
 import { isTouchDevice } from "#/helpers/device";
 import { filterEvents } from "#/helpers/longPress";
 import { stopIonicTapClick } from "#/helpers/ionic";
+import { useOptimizedIonRouter } from "#/helpers/useOptimizedIonRouter";
 import { MastodonStatus } from "#/services/mastodon";
 
 import MastodonStatusContent from "./MastodonStatusContent";
@@ -17,13 +18,16 @@ export interface MastodonStatusItemProps {
   status: MastodonStatus;
   className?: string;
   onClick?: (status: MastodonStatus) => void;
+  disableNavigation?: boolean;
 }
 
 function MastodonStatusItem({
   status,
   className,
   onClick,
+  disableNavigation,
 }: MastodonStatusItemProps) {
+  const router = useOptimizedIonRouter();
   const openStatusActions = useMastodonStatusActions(status);
 
   // If this is a reblog, show the original status with reblog indicator
@@ -41,6 +45,18 @@ function MastodonStatusItem({
     filterEvents,
   });
 
+  const handleClick = useCallback(() => {
+    if (onClick) {
+      onClick(displayStatus);
+      return;
+    }
+
+    if (disableNavigation) return;
+
+    // Navigate to the status detail page
+    router.push(`/posts/mastodon/status/${displayStatus.id}`);
+  }, [onClick, disableNavigation, router, displayStatus]);
+
   return (
     <IonItem
       mode="ios"
@@ -50,7 +66,7 @@ function MastodonStatusItem({
         className,
       )}
       detail={false}
-      onClick={() => onClick?.(displayStatus)}
+      onClick={handleClick}
       href={undefined}
       {...bind()}
     >

@@ -1,6 +1,8 @@
-import { IonSearchbar, IonToolbar } from "@ionic/react";
+import { IonSearchbar, IonTitle, IonToolbar } from "@ionic/react";
 import { createRef, useState } from "react";
 
+import { activeMastodonAccountSelector } from "#/features/auth/mastodon/mastodonAuthSlice";
+import MastodonSearchPage from "#/features/mastodon/pages/MastodonSearchPage";
 import EmptySearch from "#/features/search/EmptySearch";
 import SearchOptions from "#/features/search/SearchOptions";
 import AppContent from "#/features/shared/AppContent";
@@ -10,6 +12,7 @@ import { buildSearchPostsLink } from "#/helpers/appLinkBuilder";
 import { AppPage } from "#/helpers/AppPage";
 import { findCurrentPage } from "#/helpers/ionic";
 import { useOptimizedIonRouter } from "#/helpers/useOptimizedIonRouter";
+import { useAppSelector } from "#/store";
 
 import styles from "./SearchPage.module.css";
 
@@ -27,6 +30,23 @@ export default function SearchPage() {
   const router = useOptimizedIonRouter();
   const { redirectToLemmyObjectIfNeeded } = useLemmyUrlHandler();
   const searchBarRef = createRef<HTMLIonSearchbarElement>();
+  const activeMastodonAccount = useAppSelector(activeMastodonAccountSelector);
+
+  // Show Mastodon search when Mastodon account is active
+  if (activeMastodonAccount) {
+    return (
+      <AppPage>
+        <AppHeader>
+          <IonToolbar>
+            <IonTitle>Search</IonTitle>
+          </IonToolbar>
+        </AppHeader>
+        <AppContent scrollY color="light-bg">
+          <MastodonSearchPage />
+        </AppContent>
+      </AppPage>
+    );
+  }
 
   return (
     <AppPage>

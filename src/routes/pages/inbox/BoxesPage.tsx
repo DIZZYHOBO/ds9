@@ -18,24 +18,46 @@ import {
 import { MouseEvent, use } from "react";
 
 import { SharedDialogContext } from "#/features/auth/SharedDialogContext";
+import { activeMastodonAccountSelector } from "#/features/auth/mastodon/mastodonAuthSlice";
 import BoxesRedirectBootstrapper from "#/features/inbox/BoxesRedirectBootstrapper";
 import { getInboxCounts } from "#/features/inbox/inboxSlice";
+import MastodonInboxPage from "#/features/mastodon/pages/MastodonInboxPage";
 import AppContent from "#/features/shared/AppContent";
 import AppHeader from "#/features/shared/AppHeader";
 import { AppPage } from "#/helpers/AppPage";
-import { useAppDispatch } from "#/store";
+import FeedContent from "#/routes/pages/shared/FeedContent";
+import { useAppDispatch, useAppSelector } from "#/store";
 
 export default function BoxesPage() {
   const dispatch = useAppDispatch();
+  const activeMastodonAccount = useAppSelector(activeMastodonAccountSelector);
 
   const { presentLoginIfNeeded } = use(SharedDialogContext);
 
   useIonViewWillEnter(() => {
-    dispatch(getInboxCounts());
+    if (!activeMastodonAccount) {
+      dispatch(getInboxCounts());
+    }
   });
 
   function interceptIfLoggedOut(e: MouseEvent) {
     if (presentLoginIfNeeded()) e.preventDefault();
+  }
+
+  // Show Mastodon notifications when Mastodon account is active
+  if (activeMastodonAccount) {
+    return (
+      <AppPage>
+        <AppHeader>
+          <IonToolbar>
+            <IonTitle>Notifications</IonTitle>
+          </IonToolbar>
+        </AppHeader>
+        <FeedContent>
+          <MastodonInboxPage />
+        </FeedContent>
+      </AppPage>
+    );
   }
 
   return (
