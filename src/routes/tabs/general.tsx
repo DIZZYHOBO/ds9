@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-key */
 import MastodonStatusDetailPage from "#/features/mastodon/pages/MastodonStatusDetailPage";
+import MastodonUserPage from "#/features/mastodon/pages/MastodonUserPage";
 import Route from "#/routes/common/Route";
 import ConversationPage from "#/routes/pages/inbox/ConversationPage";
 import PostDetail from "#/routes/pages/posts/PostPage";
@@ -25,6 +26,9 @@ export default [
   // Mastodon routes
   <Route exact path="/:tab/mastodon/status/:id">
     <MastodonStatusDetailPage />
+  </Route>,
+  <Route exact path="/:tab/mastodon/user/:id">
+    <MastodonUserPage />
   </Route>,
   // Lemmy routes
   <Route exact path="/:tab/:actor/c/:community">

@@ -240,6 +240,13 @@ ion-fab.fab-vertical-top {
  */
 .ion-page {
   overflow: hidden;
+  /* Ensure pages have solid background during transitions */
+  background: var(--ion-background-color, #fff);
+}
+
+/* Dark mode page background */
+.ion-palette-dark .ion-page {
+  background: var(--ion-background-color, #1c1c1e);
 }
 
 /* Make header buttons closer together (room for mod button) */
