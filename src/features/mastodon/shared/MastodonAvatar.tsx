@@ -1,7 +1,7 @@
 import { IonAvatar } from "@ionic/react";
 import { Link } from "react-router-dom";
 
-import { useBuildGeneralBrowseLink } from "#/helpers/routes";
+import { useBuildMastodonLink } from "#/helpers/routes";
 import { MastodonAccount } from "#/services/mastodon";
 
 import styles from "./MastodonAvatar.module.css";
@@ -19,7 +19,7 @@ export default function MastodonAvatar({
   className,
   linkToProfile = false,
 }: MastodonAvatarProps) {
-  const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
+  const buildMastodonLink = useBuildMastodonLink();
   const sizeClass = styles[size];
 
   const avatar = (
@@ -41,7 +41,7 @@ export default function MastodonAvatar({
   if (linkToProfile) {
     return (
       <Link
-        to={buildGeneralBrowseLink(`/mastodon/user/${account.id}`)}
+        to={buildMastodonLink(`/mastodon/user/${account.id}`)}
         className={styles.link}
         onClick={(e) => e.stopPropagation()}
       >

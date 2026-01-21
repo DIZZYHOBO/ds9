@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 
 import { cx } from "#/helpers/css";
 import { formatRelative } from "#/helpers/date";
-import { useBuildGeneralBrowseLink } from "#/helpers/routes";
+import { useBuildMastodonLink } from "#/helpers/routes";
 import { MastodonAccount, MastodonStatus } from "#/services/mastodon";
 import { useAppDispatch, useAppSelector } from "#/store";
 
@@ -48,7 +48,7 @@ export default function MastodonStatusContent({
   onReply,
 }: MastodonStatusContentProps) {
   const dispatch = useAppDispatch();
-  const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
+  const buildMastodonLink = useBuildMastodonLink();
 
   const isFavourited = useAppSelector(mastodonFavouritedSelector(status.id));
   const isReblogged = useAppSelector(mastodonRebloggedSelector(status.id));
@@ -101,7 +101,7 @@ export default function MastodonStatusContent({
                 linkToProfile
               />
               <Link
-                to={buildGeneralBrowseLink(`/mastodon/user/${status.account.id}`)}
+                to={buildMastodonLink(`/mastodon/user/${status.account.id}`)}
                 className={styles.handle}
                 onClick={(e) => e.stopPropagation()}
               >

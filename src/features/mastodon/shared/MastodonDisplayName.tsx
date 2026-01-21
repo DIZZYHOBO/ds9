@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { useBuildGeneralBrowseLink } from "#/helpers/routes";
+import { useBuildMastodonLink } from "#/helpers/routes";
 import { MastodonAccount } from "#/services/mastodon";
 
 import styles from "./MastodonDisplayName.module.css";
@@ -16,7 +16,7 @@ export default function MastodonDisplayName({
   className,
   linkToProfile = false,
 }: MastodonDisplayNameProps) {
-  const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
+  const buildMastodonLink = useBuildMastodonLink();
   const displayName = account.display_name || account.username;
 
   // Check if display name contains custom emojis
@@ -47,7 +47,7 @@ export default function MastodonDisplayName({
   if (linkToProfile) {
     return (
       <Link
-        to={buildGeneralBrowseLink(`/mastodon/user/${account.id}`)}
+        to={buildMastodonLink(`/mastodon/user/${account.id}`)}
         className={styles.link}
         onClick={(e) => e.stopPropagation()}
       >

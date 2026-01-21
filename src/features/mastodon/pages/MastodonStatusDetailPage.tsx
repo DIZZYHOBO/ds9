@@ -1,11 +1,15 @@
 import {
   IonButtons,
+  IonFab,
+  IonFabButton,
+  IonIcon,
   IonRefresher,
   IonRefresherContent,
   IonTitle,
   IonToolbar,
   RefresherCustomEvent,
 } from "@ionic/react";
+import { createOutline } from "ionicons/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { VListHandle } from "virtua";
@@ -21,6 +25,7 @@ import { AppBackButton } from "#/routes/twoColumn/AppBackButton";
 import { useAppDispatch, useAppSelector } from "#/store";
 
 import { activeMastodonAccountSelector } from "../../auth/mastodon/mastodonAuthSlice";
+import MastodonComposeModal from "../compose/MastodonComposeModal";
 import MastodonStatusItem from "../status/MastodonStatusItem";
 import { setStatuses } from "../status/mastodonStatusSlice";
 
@@ -40,8 +45,25 @@ export default function MastodonStatusDetailPage() {
   const [descendants, setDescendants] = useState<MastodonStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState<MastodonStatus | undefined>(undefined);
 
   const virtuaHandle = useRef<VListHandle>(null);
+
+  const handleReply = (targetStatus: MastodonStatus) => {
+    setReplyTo(targetStatus);
+    setComposeOpen(true);
+  };
+
+  const handleComposeClose = () => {
+    setComposeOpen(false);
+    setReplyTo(undefined);
+  };
+
+  const handleReplySuccess = () => {
+    // Refresh the thread to show the new reply
+    loadStatus();
+  };
 
   const client = useMemo(() => {
     if (!activeAccount) return null;
@@ -168,6 +190,7 @@ export default function MastodonStatusDetailPage() {
                 <MastodonStatusItem
                   status={s}
                   className={index === mainStatusIndex ? styles.highlighted : undefined}
+                  onReply={handleReply}
                 />
               </div>
             ))}
@@ -178,7 +201,25 @@ export default function MastodonStatusDetailPage() {
             )}
           </AppVList>
         )}
+
+        <IonFab slot="fixed" vertical="bottom" horizontal="end">
+          <IonFabButton onClick={() => {
+            // Reply to the main status by default
+            if (status) {
+              handleReply(status);
+            }
+          }}>
+            <IonIcon icon={createOutline} />
+          </IonFabButton>
+        </IonFab>
       </FeedContent>
+
+      <MastodonComposeModal
+        isOpen={composeOpen}
+        onDismiss={handleComposeClose}
+        replyTo={replyTo}
+        onSuccess={handleReplySuccess}
+      />
     </AppPage>
   );
 }
