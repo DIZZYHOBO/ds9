@@ -1,9 +1,16 @@
+/* Match Lemmy LargePost styling exactly */
 .container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  gap: 12px;
   padding: 12px;
+  position: relative;
+
+  /* Card styling - matches LargePost.module.css */
   background: var(--ion-background-color-step-50, var(--ion-background-color));
   border-radius: 12px;
-  margin: 0 8px 8px;
+  margin: 0 8px;
   width: calc(100% - 16px);
   border: 1px solid var(--ion-border-color, rgba(255, 255, 255, 0.1));
 }
@@ -13,9 +20,7 @@
   align-items: center;
   gap: 6px;
   color: var(--ion-color-medium);
-  font-size: 0.8rem;
-  margin-bottom: 8px;
-  padding-left: 44px;
+  font-size: 0.8em;
 
   ion-icon {
     font-size: 0.9rem;
@@ -31,69 +36,59 @@
   }
 }
 
-.mainContent {
-  display: flex;
-  gap: 10px;
-}
-
-.avatarLink {
-  flex-shrink: 0;
-}
-
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.content {
-  flex: 1;
-  min-width: 0;
+.header {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
-.authorLine {
+.authorInfo {
+  font-size: 0.8em;
+  color: var(--ion-color-text-aside);
+}
+
+.authorLink {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
-}
-
-.authorName {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--ion-text-color);
   text-decoration: none;
+  color: inherit;
 
   &:hover {
     text-decoration: underline;
   }
 }
 
+.authorAvatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.authorName {
+  font-weight: 500;
+  color: var(--ion-text-color);
+}
+
 .authorHandle {
   color: var(--ion-color-medium);
-  font-size: 0.8rem;
 }
 
 .spoilerWarning {
   background: var(--ion-color-warning-tint);
   padding: 6px 10px;
   border-radius: 6px;
-  margin: 4px 0;
   font-size: 0.85rem;
 }
 
 .statusText {
   line-height: 1.4;
-  font-size: 0.95rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
 
   p {
-    margin: 0 0 0.4em 0;
+    margin: 0 0 0.5em 0;
 
     &:last-child {
       margin-bottom: 0;
@@ -118,55 +113,68 @@
   }
 }
 
+/* Details row - matches LargePost.module.css */
+.details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8em;
+  color: var(--ion-color-text-aside);
+}
+
+.leftDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
 .stats {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 6px;
-  color: var(--ion-color-medium);
-  font-size: 0.8rem;
 }
 
 .stat {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 
   ion-icon {
-    font-size: 0.9rem;
+    font-size: 1rem;
   }
 }
 
-.rightActions {
+/* Right details - matches LargePost.module.css */
+.rightDetails {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
+  font-size: 1.5rem;
+
+  > * {
+    padding: 0.5rem !important;
+  }
 }
 
 .actionBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
   background: none;
   border: none;
   color: var(--ion-color-medium);
   cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s ease;
+  padding: 0.5rem;
 
   ion-icon {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
   }
 
   &:hover {
-    background: var(--ion-color-light);
+    color: var(--ion-color-primary);
   }
 
-  &.upvote.active {
+  &.active {
     color: var(--ion-color-primary);
   }
 }

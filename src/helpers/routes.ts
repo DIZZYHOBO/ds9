@@ -23,7 +23,9 @@ export function useBuildGeneralBrowseLink() {
     // /settings/lemmy.world is invalid. Posts tab is special case
     if (tab !== "posts" && (!path || path === "/")) return `/${tab}`;
 
-    return `/${tab}/${connectedInstance}${path}`;
+    // Default to lemmy.world if no connected instance
+    const instance = connectedInstance || "lemmy.world";
+    return `/${tab}/${instance}${path}`;
   };
 }
 
