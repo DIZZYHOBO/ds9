@@ -45,6 +45,8 @@ interface MastodonAuthState {
   } | null;
   loading: boolean;
   error: string | null;
+  // Flag to indicate whether Mastodon mode is active (vs Lemmy mode)
+  isMastodonMode: boolean;
 }
 
 function getAccountsFromStorage(): MastodonAccountsStoragePayload | undefined {
@@ -89,6 +91,7 @@ const initialState: MastodonAuthState = {
   pendingAuth: null,
   loading: false,
   error: null,
+  isMastodonMode: false,
 };
 
 export const mastodonAuthSlice = createSlice({
@@ -130,6 +133,9 @@ export const mastodonAuthSlice = createSlice({
       // Add the new account
       state.accountData.accounts.unshift(action.payload);
       state.accountData.activeHandle = handle;
+
+      // Enable Mastodon mode since user just logged in
+      state.isMastodonMode = true;
 
       saveAccountsToStorage(state.accountData);
     },
@@ -182,6 +188,9 @@ export const mastodonAuthSlice = createSlice({
     ) => {
       state.instanceInfo[action.payload.instance] = action.payload.info;
     },
+    setMastodonMode: (state, action: PayloadAction<boolean>) => {
+      state.isMastodonMode = action.payload;
+    },
     resetMastodonAuth: () => initialState,
   },
 });
@@ -196,6 +205,7 @@ export const {
   setMastodonAccounts,
   setConnectedInstance,
   setInstanceInfo,
+  setMastodonMode,
   resetMastodonAuth,
 } = mastodonAuthSlice.actions;
 
@@ -207,6 +217,9 @@ export const mastodonAccountsSelector = (state: RootState) =>
   state.mastodonAuth.accountData?.accounts ?? [];
 
 export const activeMastodonAccountSelector = (state: RootState) => {
+  // Only return the active Mastodon account if Mastodon mode is enabled
+  if (!state.mastodonAuth.isMastodonMode) return undefined;
+
   const data = state.mastodonAuth.accountData;
   if (!data?.activeHandle) return undefined;
 
@@ -377,6 +390,7 @@ export const fetchMastodonInstanceInfo =
 export const switchMastodonAccount =
   (handle: string) => (dispatch: AppDispatch) => {
     dispatch(setActiveMastodonAccount(handle));
+    dispatch(setMastodonMode(true));
   };
 
 // Helper to get Mastodon client for a specific account
