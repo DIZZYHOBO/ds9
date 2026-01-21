@@ -24,6 +24,8 @@ interface MastodonFeedProps {
   hashtag?: string;
   accountId?: string;
   onStatusClick?: (status: MastodonStatus) => void;
+  onReply?: (status: MastodonStatus) => void;
+  onEdit?: (status: MastodonStatus) => void;
 }
 
 export default function MastodonFeed({
@@ -31,6 +33,8 @@ export default function MastodonFeed({
   hashtag,
   accountId,
   onStatusClick,
+  onReply,
+  onEdit,
 }: MastodonFeedProps) {
   const dispatch = useAppDispatch();
   const activeAccount = useAppSelector(activeMastodonAccountSelector);
@@ -186,6 +190,8 @@ export default function MastodonFeed({
             key={status.id}
             status={status}
             onClick={onStatusClick}
+            onReply={onReply}
+            onEdit={onEdit}
           />
         ))}
         {loadingMore && (

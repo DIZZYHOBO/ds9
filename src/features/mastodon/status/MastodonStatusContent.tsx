@@ -35,6 +35,7 @@ interface MastodonStatusContentProps {
   isReblog?: boolean;
   reblogger?: MastodonAccount;
   showActions?: boolean;
+  onReply?: (status: MastodonStatus) => void;
 }
 
 export default function MastodonStatusContent({
@@ -42,6 +43,7 @@ export default function MastodonStatusContent({
   isReblog,
   reblogger,
   showActions = true,
+  onReply,
 }: MastodonStatusContentProps) {
   const dispatch = useAppDispatch();
 
@@ -131,7 +133,13 @@ export default function MastodonStatusContent({
 
           {showActions && (
             <div className={styles.actions}>
-              <button className={styles.actionButton}>
+              <button
+                className={styles.actionButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReply?.(status);
+                }}
+              >
                 <IonIcon icon={chatbubbleOutline} />
                 <span>{status.replies_count || ""}</span>
               </button>

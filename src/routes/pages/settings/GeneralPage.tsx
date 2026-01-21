@@ -1,11 +1,24 @@
-import { IonBackButton, IonButtons, IonTitle, IonToolbar } from "@ionic/react";
+import {
+  IonBackButton,
+  IonButtons,
+  IonSegment,
+  IonSegmentButton,
+  IonTitle,
+  IonToolbar,
+} from "@ionic/react";
+import { useState } from "react";
 
 import GeneralSettings from "#/features/settings/general/GeneralSettings";
+import MastodonGeneralSettings from "#/features/settings/general/MastodonGeneralSettings";
 import AppContent from "#/features/shared/AppContent";
 import AppHeader from "#/features/shared/AppHeader";
 import { AppPage } from "#/helpers/AppPage";
 
+type SettingsTab = "lemmy" | "mastodon";
+
 export default function GeneralPage() {
+  const [activeTab, setActiveTab] = useState<SettingsTab>("lemmy");
+
   return (
     <AppPage>
       <AppHeader>
@@ -16,9 +29,18 @@ export default function GeneralPage() {
 
           <IonTitle>General</IonTitle>
         </IonToolbar>
+        <IonToolbar>
+          <IonSegment
+            value={activeTab}
+            onIonChange={(e) => setActiveTab(e.detail.value as SettingsTab)}
+          >
+            <IonSegmentButton value="lemmy">Lemmy</IonSegmentButton>
+            <IonSegmentButton value="mastodon">Mastodon</IonSegmentButton>
+          </IonSegment>
+        </IonToolbar>
       </AppHeader>
       <AppContent scrollY color="light-bg">
-        <GeneralSettings />
+        {activeTab === "lemmy" ? <GeneralSettings /> : <MastodonGeneralSettings />}
       </AppContent>
     </AppPage>
   );

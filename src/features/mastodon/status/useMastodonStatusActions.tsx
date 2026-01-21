@@ -3,7 +3,9 @@ import { useCallback } from "react";
 import {
   bookmark,
   bookmarkOutline,
+  chatbubbleOutline,
   copyOutline,
+  createOutline,
   heart,
   heartOutline,
   linkOutline,
@@ -27,7 +29,15 @@ import {
   toggleReblogMastodonStatus,
 } from "./mastodonStatusSlice";
 
-export default function useMastodonStatusActions(status: MastodonStatus) {
+interface StatusActionsOptions {
+  onReply?: (status: MastodonStatus) => void;
+  onEdit?: (status: MastodonStatus) => void;
+}
+
+export default function useMastodonStatusActions(
+  status: MastodonStatus,
+  options?: StatusActionsOptions,
+) {
   const dispatch = useAppDispatch();
   const [presentActionSheet] = useIonActionSheet();
   const presentToast = useAppToast();
@@ -46,6 +56,28 @@ export default function useMastodonStatusActions(status: MastodonStatus) {
 
   const openStatusActions = useCallback(() => {
     const buttons = [];
+
+    // Reply action
+    if (options?.onReply) {
+      buttons.push({
+        text: "Reply",
+        icon: chatbubbleOutline,
+        handler: () => {
+          options.onReply!(status);
+        },
+      });
+    }
+
+    // Edit action (only for own posts)
+    if (isOwnStatus && options?.onEdit) {
+      buttons.push({
+        text: "Edit",
+        icon: createOutline,
+        handler: () => {
+          options.onEdit!(status);
+        },
+      });
+    }
 
     // Favourite action
     buttons.push({
@@ -185,15 +217,11 @@ export default function useMastodonStatusActions(status: MastodonStatus) {
     dispatch,
     favourited,
     isOwnStatus,
+    options,
     presentActionSheet,
     presentToast,
     reblogged,
-    status.account.acct,
-    status.account.id,
-    status.content,
-    status.id,
-    status.url,
-    status.visibility,
+    status,
   ]);
 
   return openStatusActions;

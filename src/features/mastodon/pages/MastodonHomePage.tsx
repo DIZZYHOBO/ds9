@@ -15,6 +15,7 @@ import {
 import { createOutline, personCircleOutline } from "ionicons/icons";
 import { useState } from "react";
 
+import { MastodonStatus } from "#/services/mastodon";
 import { useAppSelector } from "#/store";
 
 import {
@@ -35,6 +36,26 @@ export default function MastodonHomePage() {
 
   const [timeline, setTimeline] = useState<TimelineType>("home");
   const [composeOpen, setComposeOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState<MastodonStatus | undefined>(undefined);
+  const [editStatus, setEditStatus] = useState<MastodonStatus | undefined>(undefined);
+
+  const handleReply = (status: MastodonStatus) => {
+    setReplyTo(status);
+    setEditStatus(undefined);
+    setComposeOpen(true);
+  };
+
+  const handleEdit = (status: MastodonStatus) => {
+    setEditStatus(status);
+    setReplyTo(undefined);
+    setComposeOpen(true);
+  };
+
+  const handleComposeClose = () => {
+    setComposeOpen(false);
+    setReplyTo(undefined);
+    setEditStatus(undefined);
+  };
 
   if (!isLoggedIn || !activeAccount) {
     return (
@@ -93,6 +114,8 @@ export default function MastodonHomePage() {
         <MastodonFeed
           key={timeline}
           feedType={getFeedType()}
+          onReply={handleReply}
+          onEdit={handleEdit}
         />
         <IonFab slot="fixed" vertical="bottom" horizontal="end">
           <IonFabButton onClick={() => setComposeOpen(true)}>
@@ -103,7 +126,9 @@ export default function MastodonHomePage() {
 
       <MastodonComposeModal
         isOpen={composeOpen}
-        onDismiss={() => setComposeOpen(false)}
+        onDismiss={handleComposeClose}
+        replyTo={replyTo}
+        editStatus={editStatus}
         onSuccess={() => {
           // Could refresh feed here if needed
         }}

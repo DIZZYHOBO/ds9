@@ -7,8 +7,8 @@ export default function AppDetails() {
     <div className={styles.container}>
       <img src="/logo.png" alt="" />
       <div>
-        Voyager <AppVersionInfo verbose betaAs="aside" />
-        <aside>by Alexander Harding</aside>
+        Tuvix <AppVersionInfo verbose betaAs="aside" />
+        <aside>by dumbass</aside>
       </div>
     </div>
   );
