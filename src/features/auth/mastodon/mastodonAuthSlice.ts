@@ -9,6 +9,7 @@ import { AppDispatch, RootState } from "#/store";
 
 const MASTODON_APP_STORAGE_PREFIX = "mastodon_app_";
 const MASTODON_ACCOUNTS_STORAGE_KEY = "mastodon_accounts";
+const MASTODON_MODE_STORAGE_KEY = "mastodon_mode";
 
 // OAuth app scopes
 export const MASTODON_SCOPES = "read write follow push";
@@ -84,6 +85,21 @@ function saveAppCredentialsToStorage(credentials: MastodonAppCredentials) {
   );
 }
 
+function getMastodonModeFromStorage(): boolean {
+  const stored = localStorage.getItem(MASTODON_MODE_STORAGE_KEY);
+  if (stored !== null) {
+    return stored === "true";
+  }
+  // If no mode is stored, check if there's an active Mastodon account
+  // This handles users who logged in before mode persistence was added
+  const accountData = getAccountsFromStorage();
+  return !!(accountData?.activeHandle);
+}
+
+function saveMastodonModeToStorage(mode: boolean) {
+  localStorage.setItem(MASTODON_MODE_STORAGE_KEY, String(mode));
+}
+
 const initialState: MastodonAuthState = {
   accountData: getAccountsFromStorage(),
   connectedInstance: undefined,
@@ -91,7 +107,7 @@ const initialState: MastodonAuthState = {
   pendingAuth: null,
   loading: false,
   error: null,
-  isMastodonMode: false,
+  isMastodonMode: getMastodonModeFromStorage(),
 };
 
 export const mastodonAuthSlice = createSlice({
@@ -136,6 +152,7 @@ export const mastodonAuthSlice = createSlice({
 
       // Enable Mastodon mode since user just logged in
       state.isMastodonMode = true;
+      saveMastodonModeToStorage(true);
 
       saveAccountsToStorage(state.accountData);
     },
@@ -148,7 +165,9 @@ export const mastodonAuthSlice = createSlice({
 
       if (state.accountData.accounts.length === 0) {
         state.accountData = undefined;
+        state.isMastodonMode = false;
         saveAccountsToStorage(undefined);
+        saveMastodonModeToStorage(false);
         return;
       }
 
@@ -190,6 +209,7 @@ export const mastodonAuthSlice = createSlice({
     },
     setMastodonMode: (state, action: PayloadAction<boolean>) => {
       state.isMastodonMode = action.payload;
+      saveMastodonModeToStorage(action.payload);
     },
     resetMastodonAuth: () => initialState,
   },
