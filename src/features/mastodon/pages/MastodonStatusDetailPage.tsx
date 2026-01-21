@@ -1,11 +1,22 @@
 import {
   IonButtons,
+  IonFab,
+  IonFabButton,
+  IonIcon,
   IonRefresher,
   IonRefresherContent,
   IonTitle,
   IonToolbar,
   RefresherCustomEvent,
 } from "@ionic/react";
+import {
+  arrowDownOutline,
+  arrowUpOutline,
+  bookmarkOutline,
+  bookmark,
+  createOutline,
+  shareOutline,
+} from "ionicons/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { VListHandle } from "virtua";
@@ -13,6 +24,7 @@ import { VListHandle } from "virtua";
 import { useRangeChange } from "#/features/feed/useRangeChange";
 import AppHeader from "#/features/shared/AppHeader";
 import { CenteredSpinner } from "#/features/shared/CenteredSpinner";
+import { cx } from "#/helpers/css";
 import { AppPage } from "#/helpers/AppPage";
 import { AppVList } from "#/helpers/virtua";
 import { MastodonClient, MastodonStatus } from "#/services/mastodon";
@@ -21,8 +33,15 @@ import { AppBackButton } from "#/routes/twoColumn/AppBackButton";
 import { useAppDispatch, useAppSelector } from "#/store";
 
 import { activeMastodonAccountSelector } from "../../auth/mastodon/mastodonAuthSlice";
+import MastodonComposeModal from "../compose/MastodonComposeModal";
 import MastodonStatusItem from "../status/MastodonStatusItem";
-import { setStatuses } from "../status/mastodonStatusSlice";
+import {
+  mastodonBookmarkedSelector,
+  mastodonFavouritedSelector,
+  setStatuses,
+  toggleBookmarkMastodonStatus,
+  toggleFavouriteMastodonStatus,
+} from "../status/mastodonStatusSlice";
 
 import styles from "./MastodonStatusDetailPage.module.css";
 
@@ -36,12 +55,41 @@ export default function MastodonStatusDetailPage() {
   const activeAccount = useAppSelector(activeMastodonAccountSelector);
 
   const [status, setStatus] = useState<MastodonStatus | null>(null);
-  const [ancestors, setAncestors] = useState<MastodonStatus[]>([]);
   const [descendants, setDescendants] = useState<MastodonStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState<MastodonStatus | undefined>(undefined);
 
   const virtuaHandle = useRef<VListHandle>(null);
+
+  // Selectors for the main status actions
+  const isFavourited = useAppSelector(mastodonFavouritedSelector(id));
+  const isBookmarked = useAppSelector(mastodonBookmarkedSelector(id));
+  const favourited = isFavourited ?? status?.favourited;
+  const bookmarked = isBookmarked ?? status?.bookmarked;
+
+  const handleReply = (targetStatus: MastodonStatus) => {
+    setReplyTo(targetStatus);
+    setComposeOpen(true);
+  };
+
+  const handleComposeClose = () => {
+    setComposeOpen(false);
+    setReplyTo(undefined);
+  };
+
+  const handleReplySuccess = () => {
+    loadStatus();
+  };
+
+  const handleFavourite = () => {
+    dispatch(toggleFavouriteMastodonStatus(id));
+  };
+
+  const handleBookmark = () => {
+    dispatch(toggleBookmarkMastodonStatus(id));
+  };
 
   const client = useMemo(() => {
     if (!activeAccount) return null;
@@ -55,17 +103,14 @@ export default function MastodonStatusDetailPage() {
     setError(null);
 
     try {
-      // Fetch the status and its context (replies) in parallel
       const [statusResponse, contextResponse] = await Promise.all([
         client.getStatus(id),
         client.getStatusContext(id),
       ]);
 
       setStatus(statusResponse);
-      setAncestors(contextResponse.ancestors);
       setDescendants(contextResponse.descendants);
 
-      // Cache all statuses
       dispatch(
         setStatuses([
           statusResponse,
@@ -89,17 +134,7 @@ export default function MastodonStatusDetailPage() {
     event.detail.complete();
   };
 
-  const onScroll = useRangeChange(virtuaHandle, () => {
-    // No pagination for context
-  });
-
-  // Combine all statuses in order: ancestors -> main status -> descendants
-  const allStatuses = useMemo(() => {
-    if (!status) return [];
-    return [...ancestors, status, ...descendants];
-  }, [ancestors, status, descendants]);
-
-  const mainStatusIndex = ancestors.length;
+  const onScroll = useRangeChange(virtuaHandle, () => {});
 
   if (!activeAccount) {
     return (
@@ -129,7 +164,7 @@ export default function MastodonStatusDetailPage() {
             <AppBackButton defaultHref="/posts" />
           </IonButtons>
           <IonTitle>
-            {status ? `${descendants.length} Replies` : "Status"}
+            {status ? `${descendants.length} Comments` : "Status"}
           </IonTitle>
         </IonToolbar>
       </AppHeader>
@@ -154,31 +189,74 @@ export default function MastodonStatusDetailPage() {
             className="ion-content-scroll-host"
             onScroll={onScroll}
           >
-            {allStatuses.map((s, index) => (
-              <div
-                key={s.id}
-                className={
-                  index === mainStatusIndex
-                    ? styles.mainStatus
-                    : index < mainStatusIndex
-                      ? styles.ancestor
-                      : styles.descendant
-                }
-              >
+            {/* Main post */}
+            {status && (
+              <>
+                <MastodonStatusItem
+                  status={status}
+                  disableNavigation
+                  onReply={handleReply}
+                />
+
+                {/* Action bar under main post */}
+                <div className={styles.actionBar}>
+                  <button
+                    className={cx(styles.actionBtn, favourited && styles.active)}
+                    onClick={handleFavourite}
+                  >
+                    <IonIcon icon={arrowUpOutline} />
+                  </button>
+                  <button className={styles.actionBtn}>
+                    <IonIcon icon={arrowDownOutline} />
+                  </button>
+                  <button
+                    className={cx(styles.actionBtn, bookmarked && styles.active)}
+                    onClick={handleBookmark}
+                  >
+                    <IonIcon icon={bookmarked ? bookmark : bookmarkOutline} />
+                  </button>
+                  <button className={styles.actionBtn}>
+                    <IonIcon icon={shareOutline} />
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* Comments - flat list */}
+            {descendants.map((s) => (
+              <div key={s.id} className={styles.comment}>
                 <MastodonStatusItem
                   status={s}
-                  className={index === mainStatusIndex ? styles.highlighted : undefined}
+                  onReply={handleReply}
                 />
               </div>
             ))}
-            {allStatuses.length === 1 && (
+
+            {descendants.length === 0 && status && (
               <div className={styles.noReplies}>
-                <p>No replies yet</p>
+                <p>No comments yet</p>
               </div>
             )}
           </AppVList>
         )}
+
+        <IonFab slot="fixed" vertical="bottom" horizontal="end">
+          <IonFabButton onClick={() => {
+            if (status) {
+              handleReply(status);
+            }
+          }}>
+            <IonIcon icon={createOutline} />
+          </IonFabButton>
+        </IonFab>
       </FeedContent>
+
+      <MastodonComposeModal
+        isOpen={composeOpen}
+        onDismiss={handleComposeClose}
+        replyTo={replyTo}
+        onSuccess={handleReplySuccess}
+      />
     </AppPage>
   );
 }

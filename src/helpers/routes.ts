@@ -26,3 +26,19 @@ export function useBuildGeneralBrowseLink() {
     return `/${tab}/${connectedInstance}${path}`;
   };
 }
+
+export function useBuildMastodonLink() {
+  const { tabRef } = use(TabContext);
+
+  const tabName = use(TabNameContext);
+  const tabNameRef = useRef(tabName);
+
+  useEffect(() => {
+    tabNameRef.current = tabName;
+  });
+
+  return function buildMastodonLink(path: string) {
+    const tab = tabNameRef.current || tabRef?.current || "posts";
+    return `/${tab}${path}`;
+  };
+}

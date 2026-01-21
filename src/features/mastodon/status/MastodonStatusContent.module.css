@@ -1,6 +1,11 @@
 .container {
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px;
+  background: var(--ion-background-color-step-50, var(--ion-background-color));
+  border-radius: 12px;
+  margin: 0 8px 8px;
+  width: calc(100% - 16px);
+  border: 1px solid var(--ion-border-color, rgba(255, 255, 255, 0.1));
 }
 
 .reblogIndicator {
@@ -8,56 +13,59 @@
   align-items: center;
   gap: 6px;
   color: var(--ion-color-medium);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   margin-bottom: 8px;
-  padding-left: 48px;
+  padding-left: 44px;
 
   ion-icon {
-    font-size: 1rem;
+    font-size: 0.9rem;
+  }
+
+  a {
+    color: var(--ion-color-medium);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
 .mainContent {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+}
+
+.avatarLink {
+  flex-shrink: 0;
 }
 
 .avatar {
-  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .content {
   flex: 1;
   min-width: 0;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.authorInfo {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  gap: 4px;
 }
 
-.displayName {
+.authorLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.authorName {
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.handle {
-  color: var(--ion-color-medium);
-  font-size: 0.85rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.9rem;
+  color: var(--ion-text-color);
   text-decoration: none;
 
   &:hover {
@@ -65,34 +73,27 @@
   }
 }
 
-.timestamp {
+.authorHandle {
   color: var(--ion-color-medium);
   font-size: 0.8rem;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.timeIcon {
-  font-size: 0.9rem;
 }
 
 .spoilerWarning {
   background: var(--ion-color-warning-tint);
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin: 8px 0;
-  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin: 4px 0;
+  font-size: 0.85rem;
 }
 
 .statusText {
-  line-height: 1.5;
+  line-height: 1.4;
+  font-size: 0.95rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
 
   p {
-    margin: 0 0 0.5em 0;
+    margin: 0 0 0.4em 0;
 
     &:last-child {
       margin-bottom: 0;
@@ -117,40 +118,55 @@
   }
 }
 
-.actions {
-  display: flex;
-  gap: 16px;
-  margin-top: 12px;
-  padding-top: 8px;
-}
-
-.actionButton {
+.stats {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
+  margin-top: 6px;
+  color: var(--ion-color-medium);
+  font-size: 0.8rem;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+
+  ion-icon {
+    font-size: 0.9rem;
+  }
+}
+
+.rightActions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   background: none;
   border: none;
   color: var(--ion-color-medium);
-  font-size: 0.85rem;
-  padding: 4px 8px;
-  margin: -4px -8px;
-  border-radius: 8px;
   cursor: pointer;
+  border-radius: 6px;
   transition: all 0.15s ease;
 
   ion-icon {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   &:hover {
     background: var(--ion-color-light);
   }
 
-  &.active {
+  &.upvote.active {
     color: var(--ion-color-primary);
-  }
-
-  &.favouriteButton.active {
-    color: var(--ion-color-danger);
   }
 }
