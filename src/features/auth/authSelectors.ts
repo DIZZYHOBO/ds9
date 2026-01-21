@@ -51,7 +51,7 @@ export const instanceSelector = createSelector([handleSelector], (handle) => {
 });
 
 export const urlSelector = (state: RootState) => {
-  return instanceSelector(state) ?? (state.auth.connectedInstance || "lemmy.world");
+  return instanceSelector(state) ?? state.auth.connectedInstance;
 };
 
 export const clientSelector = createSelector(
