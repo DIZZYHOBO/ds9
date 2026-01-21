@@ -8,9 +8,11 @@ import {
   repeatOutline,
   timeOutline,
 } from "ionicons/icons";
+import { Link } from "react-router-dom";
 
 import { cx } from "#/helpers/css";
 import { formatRelative } from "#/helpers/date";
+import { useBuildGeneralBrowseLink } from "#/helpers/routes";
 import { MastodonAccount, MastodonStatus } from "#/services/mastodon";
 import { useAppDispatch, useAppSelector } from "#/store";
 
@@ -46,6 +48,7 @@ export default function MastodonStatusContent({
   onReply,
 }: MastodonStatusContentProps) {
   const dispatch = useAppDispatch();
+  const buildGeneralBrowseLink = useBuildGeneralBrowseLink();
 
   const isFavourited = useAppSelector(mastodonFavouritedSelector(status.id));
   const isReblogged = useAppSelector(mastodonRebloggedSelector(status.id));
@@ -97,7 +100,13 @@ export default function MastodonStatusContent({
                 className={styles.displayName}
                 linkToProfile
               />
-              <span className={styles.handle}>@{status.account.acct}</span>
+              <Link
+                to={buildGeneralBrowseLink(`/mastodon/user/${status.account.id}`)}
+                className={styles.handle}
+                onClick={(e) => e.stopPropagation()}
+              >
+                @{status.account.acct}
+              </Link>
             </div>
             <span className={styles.timestamp}>
               <IonIcon icon={timeOutline} className={styles.timeIcon} />

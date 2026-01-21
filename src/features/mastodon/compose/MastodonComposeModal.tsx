@@ -12,6 +12,7 @@ import {
 } from "@ionic/react";
 import {
   closeOutline,
+  closeCircle,
   earthOutline,
   eyeOffOutline,
   lockClosedOutline,
@@ -19,10 +20,10 @@ import {
   imageOutline,
   warningOutline,
 } from "ionicons/icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import useAppToast from "#/helpers/useAppToast";
-import { MastodonInstance, MastodonStatus } from "#/services/mastodon";
+import { MastodonClient, MastodonMediaAttachment, MastodonStatus } from "#/services/mastodon";
 import { useAppDispatch, useAppSelector } from "#/store";
 
 import {
@@ -41,6 +42,12 @@ interface MastodonComposeModalProps {
   replyTo?: MastodonStatus;
   editStatus?: MastodonStatus;
   onSuccess?: (status: MastodonStatus) => void;
+}
+
+interface UploadedMedia {
+  id: string;
+  previewUrl: string;
+  uploading?: boolean;
 }
 
 const VISIBILITY_OPTIONS: {
@@ -76,6 +83,7 @@ const VISIBILITY_OPTIONS: {
 ];
 
 const MAX_CHARS = 500;
+const MAX_IMAGES = 4;
 
 export default function MastodonComposeModal({
   isOpen,
@@ -89,6 +97,7 @@ export default function MastodonComposeModal({
   const activeAccount = useAppSelector(activeMastodonAccountSelector);
 
   const textareaRef = useRef<HTMLIonTextareaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [content, setContent] = useState("");
   const [visibility, setVisibility] = useState<Visibility>("public");
@@ -96,10 +105,18 @@ export default function MastodonComposeModal({
   const [showSpoilerInput, setShowSpoilerInput] = useState(false);
   const [posting, setPosting] = useState(false);
   const [showVisibilityMenu, setShowVisibilityMenu] = useState(false);
+  const [uploadedMedia, setUploadedMedia] = useState<UploadedMedia[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  const client = useMemo(() => {
+    if (!activeAccount) return null;
+    return new MastodonClient(activeAccount.instance, activeAccount.accessToken);
+  }, [activeAccount]);
 
   const remainingChars = MAX_CHARS - content.length - spoilerText.length;
   const isOverLimit = remainingChars < 0;
-  const canPost = content.trim().length > 0 && !isOverLimit && !posting;
+  const hasContent = content.trim().length > 0 || uploadedMedia.length > 0;
+  const canPost = hasContent && !isOverLimit && !posting && !uploading;
 
   // Set initial content for replies
   useEffect(() => {
@@ -127,6 +144,15 @@ export default function MastodonComposeModal({
         setSpoilerText(editStatus.spoiler_text);
         setShowSpoilerInput(true);
       }
+      // Load existing media attachments
+      if (editStatus.media_attachments.length > 0) {
+        setUploadedMedia(
+          editStatus.media_attachments.map((m) => ({
+            id: m.id,
+            previewUrl: m.preview_url,
+          })),
+        );
+      }
     }
   }, [isOpen, editStatus]);
 
@@ -147,8 +173,69 @@ export default function MastodonComposeModal({
       setSpoilerText("");
       setShowSpoilerInput(false);
       setShowVisibilityMenu(false);
+      setUploadedMedia([]);
+      setUploading(false);
     }
   }, [isOpen]);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || !client) return;
+
+    const remainingSlots = MAX_IMAGES - uploadedMedia.length;
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+
+    if (filesToUpload.length === 0) {
+      presentToast({
+        message: `Maximum ${MAX_IMAGES} images allowed`,
+        color: "warning",
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    for (const file of filesToUpload) {
+      // Add placeholder with local preview
+      const localPreview = URL.createObjectURL(file);
+      const placeholderId = `uploading-${Date.now()}-${Math.random()}`;
+
+      setUploadedMedia((prev) => [
+        ...prev,
+        { id: placeholderId, previewUrl: localPreview, uploading: true },
+      ]);
+
+      try {
+        const media = await client.uploadMedia(file);
+
+        // Replace placeholder with actual media
+        setUploadedMedia((prev) =>
+          prev.map((m) =>
+            m.id === placeholderId
+              ? { id: media.id, previewUrl: media.preview_url }
+              : m,
+          ),
+        );
+      } catch (error) {
+        // Remove placeholder on error
+        setUploadedMedia((prev) => prev.filter((m) => m.id !== placeholderId));
+        URL.revokeObjectURL(localPreview);
+
+        presentToast({
+          message: error instanceof Error ? error.message : "Failed to upload image",
+          color: "danger",
+        });
+      }
+    }
+
+    setUploading(false);
+    // Reset file input
+    event.target.value = "";
+  };
+
+  const handleRemoveMedia = (mediaId: string) => {
+    setUploadedMedia((prev) => prev.filter((m) => m.id !== mediaId));
+  };
 
   const handlePost = async () => {
     if (!canPost) return;
@@ -157,6 +244,9 @@ export default function MastodonComposeModal({
 
     try {
       let status: MastodonStatus;
+      const mediaIds = uploadedMedia
+        .filter((m) => !m.uploading)
+        .map((m) => m.id);
 
       if (editStatus) {
         // Editing existing status
@@ -164,6 +254,7 @@ export default function MastodonComposeModal({
           editMastodonStatus(editStatus.id, {
             status: content,
             spoiler_text: showSpoilerInput ? spoilerText : undefined,
+            media_ids: mediaIds.length > 0 ? mediaIds : undefined,
           }),
         );
         presentToast({
@@ -178,6 +269,7 @@ export default function MastodonComposeModal({
             visibility,
             spoiler_text: showSpoilerInput ? spoilerText : undefined,
             in_reply_to_id: replyTo?.id,
+            media_ids: mediaIds.length > 0 ? mediaIds : undefined,
           }),
         );
         presentToast({
@@ -264,8 +356,49 @@ export default function MastodonComposeModal({
             className={styles.textarea}
           />
 
+          {uploadedMedia.length > 0 && (
+            <div className={styles.mediaPreview}>
+              {uploadedMedia.map((media) => (
+                <div key={media.id} className={styles.mediaItem}>
+                  <img src={media.previewUrl} alt="" />
+                  {media.uploading && (
+                    <div className={styles.mediaUploading}>
+                      <IonSpinner name="crescent" />
+                    </div>
+                  )}
+                  {!media.uploading && (
+                    <button
+                      className={styles.removeMedia}
+                      onClick={() => handleRemoveMedia(media.id)}
+                    >
+                      <IonIcon icon={closeCircle} />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className={styles.toolbar}>
             <div className={styles.toolbarActions}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileSelect}
+                className={styles.fileInput}
+              />
+              <button
+                className={styles.toolbarButton}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadedMedia.length >= MAX_IMAGES || uploading}
+                title="Add image"
+              >
+                <IonIcon icon={imageOutline} />
+                {uploading && <IonSpinner name="crescent" className={styles.uploadSpinner} />}
+              </button>
+
               <button
                 className={`${styles.toolbarButton} ${showSpoilerInput ? styles.active : ""}`}
                 onClick={() => setShowSpoilerInput(!showSpoilerInput)}

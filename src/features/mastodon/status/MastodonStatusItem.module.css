@@ -2,7 +2,8 @@
   --inner-padding-end: 0;
   --padding-start: 0;
   --background: none;
-  margin-bottom: 12px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
   border-bottom: 1px solid var(--ion-border-color, rgba(0, 0, 0, 0.1));
 
   &::part(native) {
