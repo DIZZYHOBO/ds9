@@ -1,6 +1,7 @@
 import { useIonActionSheet } from "@ionic/react";
 import { useCallback } from "react";
 import {
+  banOutline,
   bookmark,
   bookmarkOutline,
   chatbubbleOutline,
@@ -15,7 +16,7 @@ import {
 } from "ionicons/icons";
 
 import useAppToast from "#/helpers/useAppToast";
-import { MastodonStatus } from "#/services/mastodon";
+import { MastodonClient, MastodonStatus } from "#/services/mastodon";
 import { useAppDispatch, useAppSelector } from "#/store";
 
 import { activeMastodonAccountSelector } from "../../auth/mastodon/mastodonAuthSlice";
@@ -203,6 +204,49 @@ export default function useMastodonStatusActions(
       });
     }
 
+    // Block user action (not for own posts)
+    if (!isOwnStatus && activeAccount) {
+      buttons.push({
+        text: `Block @${status.account.acct}`,
+        icon: banOutline,
+        role: "destructive" as const,
+        handler: () => {
+          presentActionSheet({
+            header: `Block @${status.account.acct}?`,
+            subHeader: "They won't be able to follow you or see your posts.",
+            buttons: [
+              {
+                text: "Block",
+                role: "destructive",
+                handler: async () => {
+                  try {
+                    const client = new MastodonClient(
+                      activeAccount.instance,
+                      activeAccount.accessToken,
+                    );
+                    await client.blockAccount(status.account.id);
+                    presentToast({
+                      message: `Blocked @${status.account.acct}`,
+                      color: "success",
+                    });
+                  } catch {
+                    presentToast({
+                      message: "Failed to block user",
+                      color: "danger",
+                    });
+                  }
+                },
+              },
+              {
+                text: "Cancel",
+                role: "cancel",
+              },
+            ],
+          });
+        },
+      });
+    }
+
     // Cancel button
     buttons.push({
       text: "Cancel",
@@ -213,6 +257,7 @@ export default function useMastodonStatusActions(
       buttons,
     });
   }, [
+    activeAccount,
     bookmarked,
     dispatch,
     favourited,

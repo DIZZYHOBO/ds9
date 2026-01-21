@@ -1,6 +1,8 @@
 import {
   IonRefresher,
   IonRefresherContent,
+  IonSegment,
+  IonSegmentButton,
   RefresherCustomEvent,
 } from "@ionic/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -23,9 +25,12 @@ import { setStatuses } from "../status/mastodonStatusSlice";
 
 import styles from "./MastodonProfilePage.module.css";
 
+type FeedTab = "posts" | "replies";
+
 export default function MastodonProfilePage() {
   const dispatch = useAppDispatch();
   const activeAccount = useAppSelector(activeMastodonAccountSelector);
+  const [activeTab, setActiveTab] = useState<FeedTab>("posts");
   const [statuses, setLocalStatuses] = useState<MastodonStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -44,14 +49,15 @@ export default function MastodonProfilePage() {
     async (maxId?: string): Promise<PaginatedResponse<MastodonStatus> | null> => {
       if (!client || !activeAccount) return null;
 
-      // Fetch the user's own statuses including replies (comments)
+      // Posts tab: exclude replies, Replies tab: only replies
       return client.getAccountStatuses(activeAccount.account.id, {
         max_id: maxId,
         limit: 20,
-        exclude_replies: false, // Include replies/comments in the feed
+        exclude_replies: activeTab === "posts",
+        exclude_reblogs: activeTab === "replies",
       });
     },
-    [client, activeAccount],
+    [client, activeAccount, activeTab],
   );
 
   const loadInitial = useCallback(async () => {
@@ -62,7 +68,11 @@ export default function MastodonProfilePage() {
     try {
       const response = await fetchStatuses();
       if (response) {
-        setLocalStatuses(response.data);
+        // Filter to show only replies in the replies tab
+        const filteredData = activeTab === "replies"
+          ? response.data.filter(s => s.in_reply_to_id)
+          : response.data;
+        setLocalStatuses(filteredData);
         dispatch(setStatuses(response.data));
         nextMaxIdRef.current = response.next;
         setHasMore(!!response.next);
@@ -72,7 +82,7 @@ export default function MastodonProfilePage() {
     } finally {
       setLoading(false);
     }
-  }, [fetchStatuses, dispatch]);
+  }, [fetchStatuses, dispatch, activeTab]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || !nextMaxIdRef.current) return;
@@ -82,7 +92,10 @@ export default function MastodonProfilePage() {
     try {
       const response = await fetchStatuses(nextMaxIdRef.current);
       if (response) {
-        setLocalStatuses((prev) => [...prev, ...response.data]);
+        const filteredData = activeTab === "replies"
+          ? response.data.filter(s => s.in_reply_to_id)
+          : response.data;
+        setLocalStatuses((prev) => [...prev, ...filteredData]);
         dispatch(setStatuses(response.data));
         nextMaxIdRef.current = response.next;
         setHasMore(!!response.next);
@@ -92,7 +105,7 @@ export default function MastodonProfilePage() {
     } finally {
       setLoadingMore(false);
     }
-  }, [fetchStatuses, loadingMore, hasMore, dispatch]);
+  }, [fetchStatuses, loadingMore, hasMore, dispatch, activeTab]);
 
   useEffect(() => {
     loadInitial();
@@ -107,6 +120,12 @@ export default function MastodonProfilePage() {
   const handleRefresh = async (event: RefresherCustomEvent) => {
     await loadInitial();
     event.detail.complete();
+  };
+
+  const handleTabChange = (tab: FeedTab) => {
+    setActiveTab(tab);
+    setLocalStatuses([]);
+    setLoading(true);
   };
 
   if (!activeAccount) {
@@ -184,7 +203,15 @@ export default function MastodonProfilePage() {
         Joined {formatRelative(account.created_at)}
       </p>
 
-      <div className={styles.postsSectionTitle}>Posts & Replies</div>
+      <div className={styles.tabsContainer}>
+        <IonSegment
+          value={activeTab}
+          onIonChange={(e) => handleTabChange(e.detail.value as FeedTab)}
+        >
+          <IonSegmentButton value="posts">Posts</IonSegmentButton>
+          <IonSegmentButton value="replies">Replies</IonSegmentButton>
+        </IonSegment>
+      </div>
     </div>
   );
 
@@ -218,7 +245,7 @@ export default function MastodonProfilePage() {
           {profileHeader}
           {statuses.length === 0 ? (
             <div className={styles.empty}>
-              <p>No posts yet</p>
+              <p>No {activeTab === "posts" ? "posts" : "replies"} yet</p>
             </div>
           ) : (
             <>
@@ -231,7 +258,7 @@ export default function MastodonProfilePage() {
                 </div>
               )}
               {!hasMore && statuses.length > 0 && (
-                <div className={styles.endOfFeed}>No more posts</div>
+                <div className={styles.endOfFeed}>No more {activeTab}</div>
               )}
             </>
           )}

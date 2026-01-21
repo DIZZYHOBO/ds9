@@ -117,12 +117,8 @@
   margin: 0;
 }
 
-.postsSectionTitle {
-  padding: 16px;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  background: var(--ion-color-light);
+.tabsContainer {
+  padding: 12px 16px 0;
   border-top: 8px solid var(--ion-color-light);
 }
 
