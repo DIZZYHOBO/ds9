@@ -32,6 +32,7 @@ import { setAccounts } from "./authSlice";
 import MastodonAccount from "./mastodon/MastodonAccount";
 import {
   mastodonAccountsSelector,
+  setMastodonMode,
   switchMastodonAccount,
 } from "./mastodon/mastodonAuthSlice";
 
@@ -91,10 +92,18 @@ function AccountSwitcherContents({
     (state) => state.mastodonAuth.accountData?.activeHandle,
   );
 
+  const isMastodonMode = useAppSelector(
+    (state) => state.mastodonAuth.isMastodonMode,
+  );
+
   // Determine which account is currently active (Lemmy or Mastodon)
   // Mastodon handles need the "mastodon:" prefix for the radio group
   const getInitialSelectedAccount = () => {
     if (_activeHandle) return _activeHandle;
+    // Check if we're in Mastodon mode first
+    if (isMastodonMode && mastodonActiveHandle) {
+      return `mastodon:${mastodonActiveHandle}`;
+    }
     if (appActiveHandle) return appActiveHandle;
     if (mastodonActiveHandle) return `mastodon:${mastodonActiveHandle}`;
     return undefined;
@@ -107,12 +116,14 @@ function AccountSwitcherContents({
   useEffect(() => {
     if (_activeHandle) {
       setSelectedAccount(_activeHandle);
+    } else if (isMastodonMode && mastodonActiveHandle) {
+      setSelectedAccount(`mastodon:${mastodonActiveHandle}`);
     } else if (appActiveHandle) {
       setSelectedAccount(appActiveHandle);
     } else if (mastodonActiveHandle) {
       setSelectedAccount(`mastodon:${mastodonActiveHandle}`);
     }
-  }, [_activeHandle, appActiveHandle, mastodonActiveHandle]);
+  }, [_activeHandle, appActiveHandle, mastodonActiveHandle, isMastodonMode]);
 
   const hasAnyAccounts = useMemo(
     () => (lemmyAccounts?.length ?? 0) > 0 || mastodonAccounts.length > 0,
@@ -139,7 +150,10 @@ function AccountSwitcherContents({
       return;
     }
 
-    // Otherwise, it's a Lemmy account
+    // Otherwise, it's a Lemmy account - disable Mastodon mode
+    console.log("[AccountSwitcher] Switching to Lemmy account:", value);
+    dispatch(setMastodonMode(false));
+
     const selectionChangePromise = onSelectAccount?.(value);
 
     // Bail on rendering the loading indicator
