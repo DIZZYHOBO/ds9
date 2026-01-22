@@ -1,6 +1,7 @@
 import { useIonActionSheet } from "@ionic/react";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
+  addCircleOutline,
   banOutline,
   bookmark,
   bookmarkOutline,
@@ -16,6 +17,7 @@ import {
 } from "ionicons/icons";
 
 import useAppToast from "#/helpers/useAppToast";
+import { getClient } from "#/services/client";
 import { MastodonClient, MastodonStatus } from "#/services/mastodon";
 import { useAppDispatch, useAppSelector } from "#/store";
 
@@ -35,6 +37,21 @@ interface StatusActionsOptions {
   onEdit?: (status: MastodonStatus) => void;
 }
 
+// Known Lemmy-compatible instance patterns
+const LEMMY_POST_URL_PATTERN = /^https?:\/\/([^/]+)\/post\/(\d+)/;
+
+/**
+ * Detects if a status URL is from a Lemmy instance and extracts the instance and post ID
+ */
+function parseLemmyPostUrl(url: string | undefined): { instance: string; postId: number } | null {
+  if (!url) return null;
+  const match = url.match(LEMMY_POST_URL_PATTERN);
+  if (match) {
+    return { instance: match[1]!, postId: parseInt(match[2]!, 10) };
+  }
+  return null;
+}
+
 export default function useMastodonStatusActions(
   status: MastodonStatus,
   options?: StatusActionsOptions,
@@ -48,6 +65,15 @@ export default function useMastodonStatusActions(
   const isFavourited = useAppSelector(mastodonFavouritedSelector(status.id));
   const isReblogged = useAppSelector(mastodonRebloggedSelector(status.id));
   const isBookmarked = useAppSelector(mastodonBookmarkedSelector(status.id));
+
+  // Detect if this is a Lemmy post
+  const lemmyPostInfo = useMemo(() => parseLemmyPostUrl(status.url), [status.url]);
+
+  // Mastodon client for subscribing
+  const mastodonClient = useMemo(() => {
+    if (!activeAccount) return null;
+    return new MastodonClient(activeAccount.instance, activeAccount.accessToken);
+  }, [activeAccount]);
 
   const favourited = isFavourited ?? status.favourited;
   const reblogged = isReblogged ?? status.reblogged;
@@ -247,6 +273,85 @@ export default function useMastodonStatusActions(
       });
     }
 
+    // Subscribe to community action (only for Lemmy posts)
+    if (lemmyPostInfo && mastodonClient) {
+      buttons.push({
+        text: "Subscribe to Community",
+        icon: addCircleOutline,
+        handler: async () => {
+          try {
+            // Fetch the post from Lemmy to get community info
+            const lemmyClient = getClient(lemmyPostInfo.instance);
+            const postResponse = await lemmyClient.getPost({ id: lemmyPostInfo.postId });
+            const community = postResponse.post_view.community;
+
+            // Search for the community on Mastodon
+            const searchResult = await mastodonClient.search(
+              community.actor_id,
+              { type: "accounts", resolve: true, limit: 1 }
+            );
+
+            if (searchResult.accounts.length === 0) {
+              presentToast({
+                message: "Could not find community on your Mastodon instance",
+                color: "warning",
+              });
+              return;
+            }
+
+            const account = searchResult.accounts[0]!;
+
+            // Check if already following
+            const relationships = await mastodonClient.getRelationships([account.id]);
+            const isFollowing = relationships.length > 0 && relationships[0]!.following;
+
+            if (isFollowing) {
+              // Already subscribed, offer to unsubscribe
+              presentActionSheet({
+                header: `Already subscribed to ${community.name}`,
+                buttons: [
+                  {
+                    text: "Unsubscribe",
+                    role: "destructive",
+                    handler: async () => {
+                      try {
+                        await mastodonClient.unfollowAccount(account.id);
+                        presentToast({
+                          message: `Unsubscribed from ${community.name}`,
+                          color: "success",
+                        });
+                      } catch {
+                        presentToast({
+                          message: "Failed to unsubscribe",
+                          color: "danger",
+                        });
+                      }
+                    },
+                  },
+                  {
+                    text: "Cancel",
+                    role: "cancel",
+                  },
+                ],
+              });
+            } else {
+              // Subscribe
+              await mastodonClient.followAccount(account.id);
+              presentToast({
+                message: `Subscribed to ${community.name}`,
+                color: "success",
+              });
+            }
+          } catch (error) {
+            presentToast({
+              message: error instanceof Error ? error.message : "Failed to subscribe",
+              color: "danger",
+            });
+          }
+        },
+      });
+    }
+
     // Cancel button
     buttons.push({
       text: "Cancel",
@@ -262,6 +367,8 @@ export default function useMastodonStatusActions(
     dispatch,
     favourited,
     isOwnStatus,
+    lemmyPostInfo,
+    mastodonClient,
     options,
     presentActionSheet,
     presentToast,
