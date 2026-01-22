@@ -21,6 +21,8 @@ export interface MastodonStatusItemProps {
   disableNavigation?: boolean;
   onReply?: (status: MastodonStatus) => void;
   onEdit?: (status: MastodonStatus) => void;
+  /** If true, clicking a reply will navigate to its parent post for context */
+  navigateToParentOnReply?: boolean;
 }
 
 function MastodonStatusItem({
@@ -30,6 +32,7 @@ function MastodonStatusItem({
   disableNavigation,
   onReply,
   onEdit,
+  navigateToParentOnReply,
 }: MastodonStatusItemProps) {
   const router = useOptimizedIonRouter();
   const openStatusActions = useMastodonStatusActions(status, { onReply, onEdit });
@@ -57,9 +60,15 @@ function MastodonStatusItem({
 
     if (disableNavigation) return;
 
+    // If this is a reply and we want to show parent context, navigate to parent
+    if (navigateToParentOnReply && displayStatus.in_reply_to_id) {
+      router.push(`/posts/mastodon/status/${displayStatus.in_reply_to_id}`);
+      return;
+    }
+
     // Navigate to the status detail page
     router.push(`/posts/mastodon/status/${displayStatus.id}`);
-  }, [onClick, disableNavigation, router, displayStatus]);
+  }, [onClick, disableNavigation, router, displayStatus, navigateToParentOnReply]);
 
   return (
     <IonItem
