@@ -233,12 +233,15 @@ export const logoutEverything = () => (dispatch: AppDispatch) => {
 };
 
 export const changeAccount =
-  (handle: string) => (dispatch: AppDispatch, getState: () => RootState) => {
+  (handle: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(resetAccountSpecificStoreData());
     dispatch(setPrimaryAccount(handle));
 
     const instanceUrl = instanceSelector(getState());
     if (instanceUrl) dispatch(updateConnectedInstance(instanceUrl));
+
+    // Fetch site data for the new account
+    await dispatch(getSite());
   };
 
 export const logoutAccount =
