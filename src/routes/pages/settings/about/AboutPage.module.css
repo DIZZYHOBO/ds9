@@ -1,0 +1,31 @@
+.accordionContent {
+  padding: 16px;
+  background: var(--ion-item-background, var(--ion-background-color));
+
+  p {
+    margin: 0 0 8px 0;
+    line-height: 1.5;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.dateHeader {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 12px !important;
+  color: var(--ion-color-primary);
+}
+
+.listItem {
+  padding-left: 8px;
+  font-size: 0.95rem;
+}
+
+.policyTitle {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 16px !important;
+}
