@@ -115,7 +115,7 @@ export const postSlice = createSlice({
           if (post.saved) state.postSavedById[post.post.id] = post.saved;
 
           // If user restores a post, reset local state
-          // (you can't do this through Voyager, but you can with lemmy-ui)
+          // (you can't do this through Tuvix, but you can with lemmy-ui)
           if (!post.post.deleted && state.postDeletedById[post.post.id]) {
             delete state.postDeletedById[post.post.id];
           }

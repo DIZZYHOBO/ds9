@@ -80,7 +80,7 @@ export default function AboutThanksPage() {
           ))}
         </IonList>
         <p className="ion-padding-start">
-          ...and all of Voyager&apos;s contributors! 💙
+          ...and all of Tuvix&apos;s contributors! 💙
         </p>
         <InAppExternalLink
           href="https://github.com/aeharding/voyager/graphs/contributors"

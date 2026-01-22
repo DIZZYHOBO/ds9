@@ -1,6 +1,6 @@
 {
-  "short_name": "Voyager",
-  "name": "Voyager",
+  "short_name": "Tuvix",
+  "name": "Tuvix",
   "icons": [
     {
       "src": "/favicons/192.png",
@@ -19,7 +19,7 @@
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#000000",
-  "description": "Voyager is a beautiful mobile web client for lemmy. Enjoy a seamless experience browsing the fediverse.",
+  "description": "Tuvix is a beautiful mobile web client for lemmy. Enjoy a seamless experience browsing the fediverse.",
   "categories": ["social", "news"],
   "screenshots": [
     {

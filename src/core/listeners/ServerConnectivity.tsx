@@ -76,7 +76,7 @@ export default function ServerConnectivity() {
 
     presentAlert({
       header: "Unsupported instance",
-      message: `Voyager can't connect to ${connectedInstance} because it's not running a supported version of Lemmy or Piefed. Please try connecting to a different instance.`,
+      message: `Tuvix can't connect to ${connectedInstance} because it's not running a supported version of Lemmy or Piefed. Please try connecting to a different instance.`,
       buttons: [
         {
           text: "OK",

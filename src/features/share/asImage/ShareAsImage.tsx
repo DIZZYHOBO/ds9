@@ -60,7 +60,7 @@ const domToBlobOptions: DomToBlobOptions = {
           url: buildImageSrc(url, { format: "jpg" }),
           responseType: "blob",
           headers: {
-            ["User-Agent"]: "VoyagerApp/1.0",
+            ["User-Agent"]: "TuvixApp/1.0",
           },
         });
 

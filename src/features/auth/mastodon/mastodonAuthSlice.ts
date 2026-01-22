@@ -13,7 +13,7 @@ const MASTODON_MODE_STORAGE_KEY = "mastodon_mode";
 
 // OAuth app scopes
 export const MASTODON_SCOPES = "read write follow push";
-export const MASTODON_APP_NAME = "Voyager";
+export const MASTODON_APP_NAME = "Tuvix";
 export const MASTODON_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 
 // Stored OAuth app credentials per instance

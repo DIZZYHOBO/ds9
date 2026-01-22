@@ -59,7 +59,7 @@ export default function AboutPage() {
     messageIndex.current = (messageIndex.current + 1) % messages.current.length;
   }
 
-  const rateVoyager = (() => {
+  const rateTuvix = (() => {
     if (!isNative()) return;
 
     const href = isAndroid()
@@ -150,7 +150,7 @@ export default function AboutPage() {
             </IconBg>
             <IonLabel>Terms of Use</IonLabel>
           </IonItemInAppExternalLink>
-          {rateVoyager}
+          {rateTuvix}
           <IonItemInAppExternalLink
             detail
             button

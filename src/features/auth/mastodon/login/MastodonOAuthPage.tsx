@@ -144,7 +144,7 @@ export default function MastodonOAuthPage({
               <IonText>
                 <p className={styles.stepTitle}>Open authorization page</p>
                 <p className={styles.stepDescription}>
-                  Click the button below to authorize Voyager on your Mastodon
+                  Click the button below to authorize Tuvix on your Mastodon
                   account
                 </p>
               </IonText>
@@ -207,7 +207,7 @@ export default function MastodonOAuthPage({
         </div>
 
         <HelperText>
-          By using Voyager, you agree to the{" "}
+          By using Tuvix, you agree to the{" "}
           <InAppExternalLink
             href={VOYAGER_TERMS}
             target="_blank"

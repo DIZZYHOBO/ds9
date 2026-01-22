@@ -320,7 +320,7 @@ export const cacheClearFailed: AppToastOptions = {
 
 export const deepLinkFailed: AppToastOptions = {
   message:
-    "Unknown URL. Voyager only accepts URLs to Lemmy content to browse in-app.",
+    "Unknown URL. Tuvix only accepts URLs to Lemmy content to browse in-app.",
   color: "warning",
   position: "top",
   duration: 7000,

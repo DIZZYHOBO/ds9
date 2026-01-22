@@ -21,7 +21,7 @@ export function useOnExternalPaymentLinkClickHandler() {
 
     presentAlert({
       header: "Leaving App for Payment",
-      message: `You are about to leave this app to make a payment. ${vendor} is not responsible for the privacy or security of payments that are not made through ${store}. All payment-related issues, including refunds, must be handled by Voyager's support.`,
+      message: `You are about to leave this app to make a payment. ${vendor} is not responsible for the privacy or security of payments that are not made through ${store}. All payment-related issues, including refunds, must be handled by Tuvix's support.`,
       buttons: [
         {
           text: "Cancel",

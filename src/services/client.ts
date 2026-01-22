@@ -7,7 +7,7 @@ import nativeFetch from "./nativeFetch";
 const usingNativeFetch = isNative();
 
 const BASE_HEADERS = {
-  ["User-Agent"]: "VoyagerApp/1.0",
+  ["User-Agent"]: "TuvixApp/1.0",
 } as const;
 
 export function buildBaseClientUrl(url: string): string {

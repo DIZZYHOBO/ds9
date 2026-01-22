@@ -15,7 +15,7 @@ export default function DatabaseErrorModal() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        Voyager&apos;s bug tracker
+        Tuvix&apos;s bug tracker
       </InAppExternalLink>
       .
     </>
@@ -65,9 +65,9 @@ export default function DatabaseErrorModal() {
 
           <p>
             This error occurs in <strong>Lockdown Mode</strong> because certain
-            functionality is disabled that Voyager depends on.{" "}
+            functionality is disabled that Tuvix depends on.{" "}
             <strong>Please make sure Lockdown Mode is turned off</strong> so
-            Voyager can function properly. For more information on Lockdown
+            Tuvix can function properly. For more information on Lockdown
             Mode,{" "}
             <InAppExternalLink
               href="https://support.apple.com/en-us/105120"
@@ -90,7 +90,7 @@ export default function DatabaseErrorModal() {
 
   return (
     <div className="ion-padding">
-      <h3>There was an issue setting up Voyager&apos;s database.</h3>
+      <h3>There was an issue setting up Tuvix&apos;s database.</h3>
 
       {body}
 

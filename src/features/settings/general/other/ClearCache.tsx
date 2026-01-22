@@ -16,7 +16,7 @@ export default function ClearCache() {
     presentAlert({
       header: "Clear cached data",
       message:
-        'Note: This should clear most data. However, you may still see Voyager consuming 100mb of "Documents & Data" in iOS Settings. This is data cached by the operating system that Voyager cannot clear.',
+        'Note: This should clear most data. However, you may still see Tuvix consuming 100mb of "Documents & Data" in iOS Settings. This is data cached by the operating system that Tuvix cannot clear.',
       buttons: [
         {
           text: "Clear Cache",

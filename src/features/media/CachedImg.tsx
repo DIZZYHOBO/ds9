@@ -49,7 +49,7 @@ export default function CachedImg({ pictrsOptions, ...props }: CachedImgProps) {
   useEffect(() => {
     // Cache the fullscreen image. We could cache a given size
     // (and return it later if subsequent requested size is smaller)
-    // but this is simpler and works for most cases rn in Voyager
+    // but this is simpler and works for most cases rn in Tuvix
     if (!pictrsOptions?.size) {
       GLOBAL_IMAGE_CACHE.set(props.src, pictrsOptions ?? null);
     }
