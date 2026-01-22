@@ -8,6 +8,7 @@ import {
 import { clientSelector } from "#/features/auth/authSelectors";
 import { getSite } from "#/features/auth/siteSlice";
 import { getHandle } from "#/helpers/lemmy";
+import { getClient } from "#/services/client";
 import { db } from "#/services/db";
 import { AppDispatch, RootState } from "#/store";
 
@@ -71,8 +72,22 @@ export default communitySlice.reducer;
 export const getCommunity =
   (handle: string) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
-    const community = await clientSelector(getState())?.getCommunity({
-      name: handle,
+    const state = getState();
+    const isMastodonMode = state.mastodonAuth.isMastodonMode;
+
+    // In Mastodon mode, always use lemmy.world for community lookups
+    // to avoid compatibility issues with non-Lemmy instances like PieFed
+    const client = isMastodonMode
+      ? getClient("lemmy.world")
+      : clientSelector(state);
+
+    // Ensure handle includes instance for federated lookup
+    const communityHandle = isMastodonMode && !handle.includes("@")
+      ? `${handle}@lemmy.world`
+      : handle;
+
+    const community = await client?.getCommunity({
+      name: communityHandle,
     });
     if (community) dispatch(receivedCommunityResponse(community));
   };

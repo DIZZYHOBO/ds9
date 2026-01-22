@@ -92,6 +92,9 @@ const REPORT_LIMIT = 50;
 export const syncReports =
   (force = false) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
+    // Skip report sync in Mastodon mode - not relevant for Mastodon users
+    if (getState().mastodonAuth.isMastodonMode) return;
+
     // If not forced refresh, only refresh every 10 minutes
     const syncThreshold = subSeconds(
       new Date(),

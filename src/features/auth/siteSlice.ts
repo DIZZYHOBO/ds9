@@ -126,6 +126,9 @@ const siteReqIdSelector = createSelector(
 
 export const getSiteIfNeeded =
   () => async (dispatch: AppDispatch, getState: () => RootState) => {
+    // Skip Lemmy site fetch in Mastodon mode - not needed
+    if (getState().mastodonAuth.isMastodonMode) return;
+
     if (getState().site.response) return;
     if (getState().site.loading) return;
 
@@ -134,6 +137,9 @@ export const getSiteIfNeeded =
 
 export const getSoftware =
   () => async (dispatch: AppDispatch, getState: () => RootState) => {
+    // Skip in Mastodon mode - not needed for Mastodon users
+    if (getState().mastodonAuth.isMastodonMode) return;
+
     const reqId = siteReqIdSelector(getState());
     let software;
 
@@ -163,6 +169,9 @@ export const getSoftware =
 export const getSite =
   (existingSite?: GetSiteResponse) =>
   async (dispatch: AppDispatch, getState: () => RootState) => {
+    // Skip in Mastodon mode - not needed for Mastodon users
+    if (getState().mastodonAuth.isMastodonMode) return;
+
     dispatch(getSoftware());
 
     const reqId = siteReqIdSelector(getState());
