@@ -1,16 +1,20 @@
 import {
   IonButtons,
+  IonIcon,
   IonRefresher,
   IonRefresherContent,
+  IonSpinner,
   IonTitle,
   IonToolbar,
   RefresherCustomEvent,
 } from "@ionic/react";
+import { chatbubbleEllipsesOutline } from "ionicons/icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { CommentView, PostView } from "threadiverse";
 import { VListHandle } from "virtua";
 
+import { activeMastodonAccountSelector } from "#/features/auth/mastodon/mastodonAuthSlice";
 import { useRangeChange } from "#/features/feed/useRangeChange";
 import Post from "#/features/post/inFeed/Post";
 import AppHeader from "#/features/shared/AppHeader";
@@ -18,13 +22,16 @@ import { CenteredSpinner } from "#/features/shared/CenteredSpinner";
 import { AppPage } from "#/helpers/AppPage";
 import { buildCommentsTreeWithMissing } from "#/helpers/lemmy";
 import { formatNumber } from "#/helpers/number";
+import useAppToast from "#/helpers/useAppToast";
 import { AppVList } from "#/helpers/virtua";
 import FeedContent from "#/routes/pages/shared/FeedContent";
 import { AppBackButton } from "#/routes/twoColumn/AppBackButton";
 import { getClient } from "#/services/client";
-import { useAppDispatch } from "#/store";
+import { MastodonClient, MastodonStatus } from "#/services/mastodon";
+import { useAppDispatch, useAppSelector } from "#/store";
 
 import { receivedPosts } from "#/features/post/postSlice";
+import MastodonComposeModal from "../compose/MastodonComposeModal";
 import FederatedComment from "./FederatedComment";
 
 import styles from "./MastodonLemmyPostPage.module.css";
@@ -37,18 +44,69 @@ interface MastodonLemmyPostPageParams {
 export default function MastodonLemmyPostPage() {
   const { id, instance = "lemmy.world" } = useParams<MastodonLemmyPostPageParams>();
   const dispatch = useAppDispatch();
+  const presentToast = useAppToast();
 
   const [post, setPost] = useState<PostView | null>(null);
   const [comments, setComments] = useState<CommentView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resolving, setResolving] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [replyToStatus, setReplyToStatus] = useState<MastodonStatus | null>(null);
 
   const virtuaHandle = useRef<VListHandle>(null);
 
-  // Create anonymous client for the specified instance
+  const activeAccount = useAppSelector(activeMastodonAccountSelector);
+
+  // Mastodon client for the user's instance
+  const mastodonClient = useMemo(() => {
+    if (!activeAccount) return null;
+    return new MastodonClient(activeAccount.instance, activeAccount.accessToken);
+  }, [activeAccount]);
+
+  // Create anonymous Lemmy client for the specified instance
   const client = useMemo(() => {
     return getClient(instance);
   }, [instance]);
+
+  const handleReplyToPost = useCallback(async () => {
+    if (!mastodonClient || !post?.post.ap_id) {
+      presentToast({
+        message: "Cannot reply: not logged in to Mastodon",
+        color: "warning",
+      });
+      return;
+    }
+
+    setResolving(true);
+
+    try {
+      // Search for the Lemmy post on the Mastodon instance
+      const searchResult = await mastodonClient.search(post.post.ap_id, {
+        type: "statuses",
+        resolve: true,
+        limit: 1,
+      });
+
+      if (searchResult.statuses.length === 0) {
+        presentToast({
+          message: "Could not find this post on your Mastodon instance",
+          color: "warning",
+        });
+        return;
+      }
+
+      setReplyToStatus(searchResult.statuses[0]!);
+      setComposeOpen(true);
+    } catch (error) {
+      presentToast({
+        message: error instanceof Error ? error.message : "Failed to resolve post",
+        color: "danger",
+      });
+    } finally {
+      setResolving(false);
+    }
+  }, [mastodonClient, post, presentToast]);
 
   const loadPost = useCallback(async () => {
     setLoading(true);
@@ -130,6 +188,26 @@ export default function MastodonLemmyPostPage() {
             {/* Main post */}
             <Post post={post} />
 
+            {/* Reply to post action bar */}
+            {activeAccount && (
+              <div className={styles.postActions}>
+                <button
+                  className={styles.replyButton}
+                  onClick={handleReplyToPost}
+                  disabled={resolving}
+                >
+                  {resolving ? (
+                    <IonSpinner name="crescent" />
+                  ) : (
+                    <>
+                      <IonIcon icon={chatbubbleEllipsesOutline} />
+                      Reply to post
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
             {/* Comments */}
             <div className={styles.commentsHeader}>
               {formatNumber(post.counts.comments)} Comments
@@ -149,6 +227,19 @@ export default function MastodonLemmyPostPage() {
           </AppVList>
         ) : null}
       </FeedContent>
+
+      <MastodonComposeModal
+        isOpen={composeOpen}
+        onDismiss={() => {
+          setComposeOpen(false);
+          setReplyToStatus(null);
+        }}
+        replyTo={replyToStatus ?? undefined}
+        onSuccess={() => {
+          // Refresh comments after replying
+          loadPost();
+        }}
+      />
     </AppPage>
   );
 }
