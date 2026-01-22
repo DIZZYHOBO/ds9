@@ -250,7 +250,11 @@ export default function MastodonProfilePage() {
           ) : (
             <>
               {statuses.map((status) => (
-                <MastodonStatusItem key={status.id} status={status} />
+                <MastodonStatusItem
+                  key={status.id}
+                  status={status}
+                  navigateToParentOnReply={activeTab === "replies"}
+                />
               ))}
               {loadingMore && (
                 <div className={styles.loadingMore}>
