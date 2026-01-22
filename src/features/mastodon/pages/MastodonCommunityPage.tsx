@@ -48,8 +48,12 @@ interface MastodonCommunityPageParams {
   instance: string;
 }
 
+// Always use lemmy.world for community lookups to avoid compatibility issues
+// with non-Lemmy instances like PieFed that don't support all APIs
+const LEMMY_INSTANCE = "lemmy.world";
+
 export default function MastodonCommunityPage() {
-  const { community, instance = "lemmy.world" } = useParams<MastodonCommunityPageParams>();
+  const { community } = useParams<MastodonCommunityPageParams>();
   const dispatch = useAppDispatch();
   const presentToast = useAppToast();
   const router = useOptimizedIonRouter();
@@ -76,12 +80,15 @@ export default function MastodonCommunityPage() {
     return new MastodonClient(activeAccount.instance, activeAccount.accessToken);
   }, [activeAccount]);
 
-  // Anonymous Lemmy client for the specified instance
+  // Always use lemmy.world for community lookups
   const lemmyClient = useMemo(() => {
-    return getClient(instance);
-  }, [instance]);
+    return getClient(LEMMY_INSTANCE);
+  }, []);
 
-  const communityHandle = community.includes("@") ? community : `${community}@${instance}`;
+  // Extract community name and determine the instance it's from
+  const communityName = community.includes("@") ? community.split("@")[0]! : community;
+  const communityInstance = community.includes("@") ? community.split("@")[1]! : LEMMY_INSTANCE;
+  const communityHandle = `${communityName}@${communityInstance}`;
 
   const loadCommunity = useCallback(async () => {
     setLoading(true);
@@ -225,7 +232,7 @@ export default function MastodonCommunityPage() {
   };
 
   const handlePostClick = (post: PostView) => {
-    router.push(buildMastodonLink(`/mastodon/lemmy/${instance}/post/${post.post.id}`));
+    router.push(buildMastodonLink(`/mastodon/lemmy/${LEMMY_INSTANCE}/post/${post.post.id}`));
   };
 
   const communityHeader = communityView && (
@@ -249,7 +256,7 @@ export default function MastodonCommunityPage() {
             {communityView.community.title || communityView.community.name}
           </h1>
           <p className={styles.handle}>
-            !{communityView.community.name}@{instance}
+            !{communityView.community.name}@{communityInstance}
           </p>
         </div>
       </div>
