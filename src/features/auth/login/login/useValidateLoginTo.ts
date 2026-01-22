@@ -42,7 +42,7 @@ export default function useValidateLoginTo() {
       presentAlert({
         header: "⚠️ Piefed support is experimental",
         message:
-          "Mind the edge; no safety rails installed. Piefed support is EXPERIMENTAL in Voyager. Don't expect things to work right, and compatibility may break at any time.",
+          "Mind the edge; no safety rails installed. Piefed support is EXPERIMENTAL in Tuvix. Don't expect things to work right, and compatibility may break at any time.",
         buttons: [
           {
             text: "Cancel",

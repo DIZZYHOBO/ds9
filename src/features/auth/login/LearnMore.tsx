@@ -34,7 +34,7 @@ export default function LearnMore() {
           <strong>comments to discuss</strong> the post further.
         </p>
 
-        <p>Voyager is one of many apps built for Lemmy.</p>
+        <p>Tuvix is one of many apps built for Lemmy.</p>
 
         <h2>Decentralized?</h2>
         <p>
@@ -117,7 +117,7 @@ export default function LearnMore() {
           </li>
           <li>
             <IonText color="secondary">
-              <strong>Voyager</strong>
+              <strong>Tuvix</strong>
             </IonText>{" "}
             is like your{" "}
             <IonText color="warning">

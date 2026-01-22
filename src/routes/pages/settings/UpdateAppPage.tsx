@@ -126,7 +126,7 @@ export default function UpdateAppPage() {
             </div>
           )}
           {status === "current" && (
-            <div className={styles.upToDateText}>Voyager is up to date</div>
+            <div className={styles.upToDateText}>Tuvix is up to date</div>
           )}
         </div>
       </IonContent>

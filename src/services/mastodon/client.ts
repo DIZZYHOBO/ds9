@@ -12,7 +12,7 @@ const usingNativeFetch = isNative();
 
 const BASE_HEADERS = {
   "Content-Type": "application/json",
-  "User-Agent": "VoyagerApp/1.0",
+  "User-Agent": "TuvixApp/1.0",
 } as const;
 
 export function buildMastodonBaseUrl(instance: string): string {

@@ -36,7 +36,7 @@ export default function useStartJoinFlow(ref: RefObject<HTMLElement | null>) {
       (await joinClientSelector(store.getState())?.getMode()) === "piefed"
     ) {
       presentAlert(
-        `Voyager doesn't support signups via Piefed right now, apologies!`,
+        `Tuvix doesn't support signups via Piefed right now, apologies!`,
       );
 
       return;

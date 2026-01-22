@@ -139,7 +139,7 @@ export const initializeBiometricSliceDataIfNeeded =
 function updateCapacitorBiometricConfig(config: BiometricLockConfiguration) {
   BiometricLock.configure({
     ...config,
-    appName: "Voyager",
+    appName: "Tuvix",
     retryButtonColor: "#0e7afe",
   });
 }

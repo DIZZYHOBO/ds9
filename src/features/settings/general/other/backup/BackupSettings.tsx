@@ -132,7 +132,7 @@ export default function BackupSettings() {
 
   function onRestoreFail() {
     presentAlert({
-      message: "Voyager backup file malformed",
+      message: "Tuvix backup file malformed",
       color: "danger",
     });
   }

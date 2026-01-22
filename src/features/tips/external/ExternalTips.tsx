@@ -18,7 +18,7 @@ const EXTERNAL_TIPS_AMOUNTS: IExternalTip[] = [
     link: "https://donate.stripe.com/00geV90Uk8F76SQ7su",
   },
   {
-    title: "❤️‍🔥 Voyager Fanatic Tip",
+    title: "❤️‍🔥 Tuvix Fanatic Tip",
     amount: 19.99,
     link: "https://donate.stripe.com/aEUcN1fPebRjb96003",
   },

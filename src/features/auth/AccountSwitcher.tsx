@@ -24,6 +24,7 @@ import {
 import { AppPage } from "#/helpers/AppPage";
 import { moveItem } from "#/helpers/array";
 import { isPromiseResolvedByPaint } from "#/helpers/promise";
+import { useOptimizedIonRouter } from "#/helpers/useOptimizedIonRouter";
 import { useAppDispatch, useAppSelector } from "#/store";
 
 import Account from "./Account";
@@ -72,6 +73,7 @@ function AccountSwitcherContents({
   if ("presentLogin" in rest) presentLogin = rest.presentLogin;
 
   const dispatch = useAppDispatch();
+  const router = useOptimizedIonRouter();
   const [loading, setLoading] = useState(false);
 
   // Lemmy accounts
@@ -147,12 +149,20 @@ function AccountSwitcherContents({
       console.log("[AccountSwitcher] Switching to Mastodon account:", mastodonHandle);
       dispatch(switchMastodonAccount(mastodonHandle));
       onDismiss();
+      // Navigate to posts tab to ensure clean routing state
+      requestAnimationFrame(() => {
+        router.push("/posts", "root", "replace");
+      });
       return;
     }
 
     // Otherwise, it's a Lemmy account - disable Mastodon mode
     console.log("[AccountSwitcher] Switching to Lemmy account:", value);
     dispatch(setMastodonMode(false));
+    // Navigate to posts tab to ensure clean routing state
+    requestAnimationFrame(() => {
+      router.push("/posts", "root", "replace");
+    });
 
     const selectionChangePromise = onSelectAccount?.(value);
 

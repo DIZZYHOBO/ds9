@@ -185,7 +185,7 @@ function findFeedContext(
 
 /**
  * @param context What kind of feed is this?
- * @param sort The Voyager sort to convert to threadiverse sort params
+ * @param sort The Tuvix sort to convert to threadiverse sort params
  * @returns The sort, null if loaded but no result. Null if still loading async.
  */
 export function useFeedSortParams<Context extends FeedSortContext>(

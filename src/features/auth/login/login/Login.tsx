@@ -205,7 +205,7 @@ export default function Login({ url, siteIcon }: LoginProps) {
         </form>
 
         <HelperText>
-          By using Voyager, you agree to the{" "}
+          By using Tuvix, you agree to the{" "}
           <InAppExternalLink
             href={VOYAGER_TERMS}
             target="_blank"

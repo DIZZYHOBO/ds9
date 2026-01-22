@@ -67,9 +67,9 @@ Error: \`\`${error}\`\`
 
   return (
     <div className={styles.container}>
-      <h2>🫣 Gah! Voyager crashed!</h2>
+      <h2>🫣 Gah! Tuvix crashed!</h2>
       <div>
-        Voyager does not collect any data, so we would appreciate you
+        Tuvix does not collect any data, so we would appreciate you
         voluntarily submitting this crash for us to investigate.
       </div>
       <IonButton
@@ -99,7 +99,7 @@ Error: \`\`${error}\`\`
           target="_blank"
           rel="noopener noreferrer"
         >
-          at Voyager&apos;s Lemmy community
+          at Tuvix&apos;s Lemmy community
         </a>
         .
       </div>

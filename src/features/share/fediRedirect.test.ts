@@ -7,8 +7,8 @@ import {
   GO_VOYAGER_HOST,
 } from "./fediRedirect";
 
-describe("buildGoVoyagerLink", () => {
-  it("builds a valid goVoyager link from a Lemmy URL", () => {
+describe("buildGoTuvixLink", () => {
+  it("builds a valid goTuvix link from a Lemmy URL", () => {
     const input = "https://lemmy.world/post/123";
     const expected = `https://vger.to/lemmy.world/post/123`;
     expect(buildFediRedirectLink(GO_VOYAGER_HOST, input)).toBe(expected);

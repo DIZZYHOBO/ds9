@@ -59,9 +59,9 @@ export default function Legal() {
         </AppHeader>
 
         <p className="ion-padding">
-          The Voyager app does not collect any data, but the server you sign up
+          The Tuvix app does not collect any data, but the server you sign up
           with may have a different policy. Take a moment to review and agree to
-          the Voyager App policies as well as your server&apos;s policies.
+          the Tuvix App policies as well as your server&apos;s policies.
         </p>
 
         <IonList inset>
@@ -71,7 +71,7 @@ export default function Legal() {
             rel="noopener noreferrer"
             onClick={interceptHrefWithInAppBrowserIfNeeded(VOYAGER_PRIVACY)}
           >
-            Voyager App — Privacy Policy
+            Tuvix App — Privacy Policy
           </IonItem>
           <IonItem
             href={VOYAGER_TERMS}
@@ -79,7 +79,7 @@ export default function Legal() {
             rel="noopener noreferrer"
             onClick={interceptHrefWithInAppBrowserIfNeeded(VOYAGER_TERMS)}
           >
-            Voyager App — Terms of Use
+            Tuvix App — Terms of Use
           </IonItem>
         </IonList>
 
